@@ -82,6 +82,438 @@ func NewClient(opts ...client.Option) *Client {
 	return c
 }
 
+func (c *Client) Name() string {
+	return c.opts.Name
+}
+
+func (c *Client) Init(opts ...client.Option) error {
+	for _, o := range opts {
+		o(&c.opts)
+	}
+
+	c.opts.Hooks.EachPrev(func(hook options.Hook) {
+		switch h := hook.(type) {
+		case client.HookCall:
+			c.funcCall = h(c.funcCall)
+		case client.HookStream:
+			c.funcStream = h(c.funcStream)
+		}
+	})
+
+	return nil
+}
+
+func (c *Client) Options() client.Options {
+	return c.opts
+}
+
+func (c *Client) NewRequest(service, method string, req interface{}, opts ...client.RequestOption) client.Request {
+	return newHTTPRequest(service, method, req, c.opts.ContentType, opts...)
+}
+
+func (c *Client) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+	ts := time.Now()
+	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
+	var sp tracer.Span
+	ctx, sp = c.opts.Tracer.Start(ctx, req.Endpoint()+" rpc-client",
+		tracer.WithSpanKind(tracer.SpanKindClient),
+		tracer.WithSpanLabels("endpoint", req.Endpoint()),
+	)
+	err := c.funcCall(ctx, req, rsp, opts...)
+	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Dec()
+	te := time.Since(ts)
+	c.opts.Meter.Summary(semconv.ClientRequestLatencyMicroseconds, "endpoint", req.Endpoint()).Update(te.Seconds())
+	c.opts.Meter.Histogram(semconv.ClientRequestDurationSeconds, "endpoint", req.Endpoint()).Update(te.Seconds())
+
+	if me := errors.FromError(err); me == nil {
+		sp.Finish()
+		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "success", "code", strconv.Itoa(int(200))).Inc()
+	} else {
+		sp.SetStatus(tracer.SpanStatusError, err.Error())
+		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "failure", "code", strconv.Itoa(int(me.Code))).Inc()
+	}
+
+	return err
+}
+
+func (c *Client) Stream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
+	ts := time.Now()
+	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
+	var sp tracer.Span
+	ctx, sp = c.opts.Tracer.Start(ctx, req.Endpoint()+" rpc-client",
+		tracer.WithSpanKind(tracer.SpanKindClient),
+		tracer.WithSpanLabels("endpoint", req.Endpoint()),
+	)
+	stream, err := c.funcStream(ctx, req, opts...)
+	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Dec()
+	te := time.Since(ts)
+	c.opts.Meter.Summary(semconv.ClientRequestLatencyMicroseconds, "endpoint", req.Endpoint()).Update(te.Seconds())
+	c.opts.Meter.Histogram(semconv.ClientRequestDurationSeconds, "endpoint", req.Endpoint()).Update(te.Seconds())
+
+	if me := errors.FromError(err); me == nil {
+		sp.Finish()
+		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "success", "code", strconv.Itoa(int(200))).Inc()
+	} else {
+		sp.SetStatus(tracer.SpanStatusError, err.Error())
+		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "failure", "code", strconv.Itoa(int(me.Code))).Inc()
+	}
+
+	return stream, err
+}
+
+func (c *Client) String() string {
+	return "http"
+}
+
+func (c *Client) newCodec(ct string) (codec.Codec, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if idx := strings.IndexRune(ct, ';'); idx >= 0 {
+		ct = ct[:idx]
+	}
+
+	if cf, ok := c.opts.Codecs[ct]; ok {
+		return cf, nil
+	}
+
+	return nil, codec.ErrUnknownContentType
+}
+
+func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+	// make a copy of call opts
+	callOpts := c.opts.CallOptions
+	for _, opt := range opts {
+		opt(&callOpts)
+	}
+
+	// check if we already have a deadline
+	d, ok := ctx.Deadline()
+	if !ok {
+		var cancel context.CancelFunc
+		// no deadline so we create a new one
+		ctx, cancel = context.WithTimeout(ctx, callOpts.RequestTimeout)
+		defer cancel()
+	} else {
+		// got a deadline so no need to setup context
+		// but we need to set the timeout we pass along
+		opt := client.WithRequestTimeout(time.Until(d))
+		opt(&callOpts)
+	}
+
+	// should we noop right here?
+	select {
+	case <-ctx.Done():
+		return errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
+	default:
+	}
+
+	// make copy of call method
+	hcall := c.call
+
+	// use the router passed as a call option, or fallback to the rpc clients router
+	if callOpts.Router == nil {
+		callOpts.Router = c.opts.Router
+	}
+
+	if callOpts.Selector == nil {
+		callOpts.Selector = c.opts.Selector
+	}
+
+	// inject proxy address
+	// TODO: don't even bother using Lookup/Select in this case
+	if len(c.opts.Proxy) > 0 {
+		callOpts.Address = []string{c.opts.Proxy}
+	}
+
+	var next selector.Next
+
+	// return errors.New("go.micro.client", "request timeout", 408)
+	call := func(i int) error {
+		// call backoff first. Someone may want an initial start delay
+		t, err := callOpts.Backoff(ctx, req, i)
+		if err != nil {
+			return errors.InternalServerError("go.micro.client", "%+v", err)
+		}
+
+		// only sleep if greater than 0
+		if t.Seconds() > 0 {
+			time.Sleep(t)
+		}
+
+		if next == nil {
+			var routes []string
+			// lookup the route to send the reques to
+			// TODO apply any filtering here
+			routes, err = c.opts.Lookup(ctx, req, callOpts)
+			if err != nil {
+				return errors.InternalServerError("go.micro.client", "%+v", err)
+			}
+
+			// balance the list of nodes
+			next, err = callOpts.Selector.Select(routes)
+			if err != nil {
+				return err
+			}
+		}
+
+		node := next()
+
+		// make the call
+		err = hcall(ctx, node, req, rsp, callOpts)
+		// record the result of the call to inform future routing decisions
+		if verr := c.opts.Selector.Record(node, err); verr != nil {
+			return verr
+		}
+
+		// try and transform the error to a go-micro error
+		if verr, ok := err.(*errors.Error); ok {
+			return verr
+		}
+
+		return err
+	}
+
+	ch := make(chan error, callOpts.Retries)
+	var gerr error
+
+	for i := 0; i <= callOpts.Retries; i++ {
+		go func() {
+			ch <- call(i)
+		}()
+
+		select {
+		case <-ctx.Done():
+			return errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
+		case err := <-ch:
+			// if the call succeeded lets bail early
+			if err == nil {
+				return nil
+			}
+
+			retry, rerr := callOpts.Retry(ctx, req, i, err)
+			if rerr != nil {
+				return rerr
+			}
+
+			if !retry {
+				return err
+			}
+
+			gerr = err
+		}
+	}
+
+	return gerr
+}
+
+func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp interface{}, opts client.CallOptions) error {
+	ct := req.ContentType()
+	if len(opts.ContentType) > 0 {
+		ct = opts.ContentType
+	}
+
+	cf, err := c.newCodec(ct)
+	if err != nil {
+		return errors.BadRequest("go.micro.client", "%+v", err)
+	}
+	hreq, err := newRequest(ctx, c.opts.Logger, addr, req, ct, cf, req.Body(), opts)
+	if err != nil {
+		return err
+	}
+
+	// make the request
+	hrsp, err := c.httpClient.Do(hreq)
+	if err != nil {
+		switch err := err.(type) {
+		case *url.Error:
+			if err, ok := err.Err.(net.Error); ok && err.Timeout() {
+				return errors.Timeout("go.micro.client", "%+v", err)
+			}
+		case net.Error:
+			if err.Timeout() {
+				return errors.Timeout("go.micro.client", "%+v", err)
+			}
+		}
+		return errors.InternalServerError("go.micro.client", "%+v", err)
+	}
+
+	defer hrsp.Body.Close()
+
+	return c.parseRsp(ctx, hrsp, rsp, opts)
+}
+
+func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
+	var err error
+
+	// make a copy of call opts
+	callOpts := c.opts.CallOptions
+	for _, o := range opts {
+		o(&callOpts)
+	}
+
+	// check if we already have a deadline
+	d, ok := ctx.Deadline()
+	if !ok && callOpts.StreamTimeout > time.Duration(0) {
+		var cancel context.CancelFunc
+		// no deadline so we create a new one
+		ctx, cancel = context.WithTimeout(ctx, callOpts.StreamTimeout)
+		defer cancel()
+	} else {
+		// got a deadline so no need to setup context
+		// but we need to set the timeout we pass along
+		o := client.WithStreamTimeout(time.Until(d))
+		o(&callOpts)
+	}
+
+	// should we noop right here?
+	select {
+	case <-ctx.Done():
+		return nil, errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
+	default:
+	}
+
+	/*
+		// make copy of call method
+		hstream := h.stream
+		// wrap the call in reverse
+		for i := len(callOpts.CallWrappers); i > 0; i-- {
+			hstream = callOpts.CallWrappers[i-1](hstream)
+		}
+	*/
+
+	// use the router passed as a call option, or fallback to the rpc clients router
+	if callOpts.Router == nil {
+		callOpts.Router = c.opts.Router
+	}
+
+	if callOpts.Selector == nil {
+		callOpts.Selector = c.opts.Selector
+	}
+
+	// inject proxy address
+	// TODO: don't even bother using Lookup/Select in this case
+	if len(c.opts.Proxy) > 0 {
+		callOpts.Address = []string{c.opts.Proxy}
+	}
+
+	var next selector.Next
+
+	call := func(i int) (client.Stream, error) {
+		// call backoff first. Someone may want an initial start delay
+		t, cerr := callOpts.Backoff(ctx, req, i)
+		if cerr != nil {
+			return nil, errors.InternalServerError("go.micro.client", "%+v", cerr)
+		}
+
+		// only sleep if greater than 0
+		if t.Seconds() > 0 {
+			time.Sleep(t)
+		}
+
+		if next == nil {
+			var routes []string
+			// lookup the route to send the reques to
+			// TODO apply any filtering here
+			routes, err = c.opts.Lookup(ctx, req, callOpts)
+			if err != nil {
+				return nil, errors.InternalServerError("go.micro.client", "%+v", err)
+			}
+
+			// balance the list of nodes
+			next, err = callOpts.Selector.Select(routes)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		node := next()
+
+		stream, cerr := c.stream(ctx, node, req, callOpts)
+
+		// record the result of the call to inform future routing decisions
+		if verr := c.opts.Selector.Record(node, cerr); verr != nil {
+			return nil, verr
+		}
+
+		// try and transform the error to a go-micro error
+		if verr, ok := cerr.(*errors.Error); ok {
+			return nil, verr
+		}
+
+		return stream, cerr
+	}
+
+	type response struct {
+		stream client.Stream
+		err    error
+	}
+
+	ch := make(chan response, callOpts.Retries)
+	var grr error
+
+	for i := 0; i <= callOpts.Retries; i++ {
+		go func() {
+			s, cerr := call(i)
+			ch <- response{s, cerr}
+		}()
+
+		select {
+		case <-ctx.Done():
+			return nil, errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
+		case rsp := <-ch:
+			// if the call succeeded lets bail early
+			if rsp.err == nil {
+				return rsp.stream, nil
+			}
+
+			retry, rerr := callOpts.Retry(ctx, req, i, err)
+			if rerr != nil {
+				return nil, rerr
+			}
+
+			if !retry {
+				return nil, rsp.err
+			}
+
+			grr = rsp.err
+		}
+	}
+
+	return nil, grr
+}
+
+func (c *Client) stream(ctx context.Context, addr string, req client.Request, opts client.CallOptions) (client.Stream, error) {
+	ct := req.ContentType()
+	if len(opts.ContentType) > 0 {
+		ct = opts.ContentType
+	}
+
+	// get codec
+	cf, err := c.newCodec(ct)
+	if err != nil {
+		return nil, errors.BadRequest("go.micro.client", "%+v", err)
+	}
+
+	cc, err := (c.httpClient.Transport).(*http.Transport).DialContext(ctx, "tcp", addr)
+	if err != nil {
+		return nil, errors.InternalServerError("go.micro.client", "Error dialing: %v", err)
+	}
+
+	return &httpStream{
+		address: addr,
+		logger:  c.opts.Logger,
+		context: ctx,
+		closed:  make(chan bool),
+		opts:    opts,
+		conn:    cc,
+		ct:      ct,
+		cf:      cf,
+		reader:  bufio.NewReader(cc),
+		request: req,
+	}, nil
+}
+
 func newRequest(ctx context.Context, log logger.Logger, addr string, req client.Request, ct string, cf codec.Codec, msg interface{}, opts client.CallOptions) (*http.Request, error) {
 	var tags []string
 	var parameters map[string]map[string]string
@@ -267,440 +699,4 @@ func newRequest(ctx context.Context, log logger.Logger, addr string, req client.
 	}
 
 	return hreq, nil
-}
-
-func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp interface{}, opts client.CallOptions) error {
-	ct := req.ContentType()
-	if len(opts.ContentType) > 0 {
-		ct = opts.ContentType
-	}
-
-	cf, err := c.newCodec(ct)
-	if err != nil {
-		return errors.BadRequest("go.micro.client", "%+v", err)
-	}
-	hreq, err := newRequest(ctx, c.opts.Logger, addr, req, ct, cf, req.Body(), opts)
-	if err != nil {
-		return err
-	}
-
-	// make the request
-	hrsp, err := c.httpClient.Do(hreq)
-	if err != nil {
-		switch err := err.(type) {
-		case *url.Error:
-			if err, ok := err.Err.(net.Error); ok && err.Timeout() {
-				return errors.Timeout("go.micro.client", "%+v", err)
-			}
-		case net.Error:
-			if err.Timeout() {
-				return errors.Timeout("go.micro.client", "%+v", err)
-			}
-		}
-		return errors.InternalServerError("go.micro.client", "%+v", err)
-	}
-
-	defer hrsp.Body.Close()
-
-	return c.parseRsp(ctx, hrsp, rsp, opts)
-}
-
-func (c *Client) stream(ctx context.Context, addr string, req client.Request, opts client.CallOptions) (client.Stream, error) {
-	ct := req.ContentType()
-	if len(opts.ContentType) > 0 {
-		ct = opts.ContentType
-	}
-
-	// get codec
-	cf, err := c.newCodec(ct)
-	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
-	}
-
-	cc, err := (c.httpClient.Transport).(*http.Transport).DialContext(ctx, "tcp", addr)
-	if err != nil {
-		return nil, errors.InternalServerError("go.micro.client", "Error dialing: %v", err)
-	}
-
-	return &httpStream{
-		address: addr,
-		logger:  c.opts.Logger,
-		context: ctx,
-		closed:  make(chan bool),
-		opts:    opts,
-		conn:    cc,
-		ct:      ct,
-		cf:      cf,
-		reader:  bufio.NewReader(cc),
-		request: req,
-	}, nil
-}
-
-func (c *Client) newCodec(ct string) (codec.Codec, error) {
-	c.mu.RLock()
-
-	if idx := strings.IndexRune(ct, ';'); idx >= 0 {
-		ct = ct[:idx]
-	}
-
-	if cf, ok := c.opts.Codecs[ct]; ok {
-		c.mu.RUnlock()
-		return cf, nil
-	}
-
-	c.mu.RUnlock()
-	return nil, codec.ErrUnknownContentType
-}
-
-func (c *Client) Init(opts ...client.Option) error {
-	for _, o := range opts {
-		o(&c.opts)
-	}
-
-	c.funcCall = c.fnCall
-	c.funcStream = c.fnStream
-
-	c.opts.Hooks.EachPrev(func(hook options.Hook) {
-		switch h := hook.(type) {
-		case client.HookCall:
-			c.funcCall = h(c.funcCall)
-		case client.HookStream:
-			c.funcStream = h(c.funcStream)
-		}
-	})
-
-	return nil
-}
-
-func (c *Client) Options() client.Options {
-	return c.opts
-}
-
-func (c *Client) NewRequest(service, method string, req interface{}, opts ...client.RequestOption) client.Request {
-	return newHTTPRequest(service, method, req, c.opts.ContentType, opts...)
-}
-
-func (c *Client) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
-	ts := time.Now()
-	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
-	var sp tracer.Span
-	ctx, sp = c.opts.Tracer.Start(ctx, req.Endpoint()+" rpc-client",
-		tracer.WithSpanKind(tracer.SpanKindClient),
-		tracer.WithSpanLabels("endpoint", req.Endpoint()),
-	)
-	err := c.funcCall(ctx, req, rsp, opts...)
-	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Dec()
-	te := time.Since(ts)
-	c.opts.Meter.Summary(semconv.ClientRequestLatencyMicroseconds, "endpoint", req.Endpoint()).Update(te.Seconds())
-	c.opts.Meter.Histogram(semconv.ClientRequestDurationSeconds, "endpoint", req.Endpoint()).Update(te.Seconds())
-
-	if me := errors.FromError(err); me == nil {
-		sp.Finish()
-		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "success", "code", strconv.Itoa(int(200))).Inc()
-	} else {
-		sp.SetStatus(tracer.SpanStatusError, err.Error())
-		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "failure", "code", strconv.Itoa(int(me.Code))).Inc()
-	}
-
-	return err
-}
-
-func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
-	// make a copy of call opts
-	callOpts := c.opts.CallOptions
-	for _, opt := range opts {
-		opt(&callOpts)
-	}
-
-	// check if we already have a deadline
-	d, ok := ctx.Deadline()
-	if !ok {
-		var cancel context.CancelFunc
-		// no deadline so we create a new one
-		ctx, cancel = context.WithTimeout(ctx, callOpts.RequestTimeout)
-		defer cancel()
-	} else {
-		// got a deadline so no need to setup context
-		// but we need to set the timeout we pass along
-		opt := client.WithRequestTimeout(time.Until(d))
-		opt(&callOpts)
-	}
-
-	// should we noop right here?
-	select {
-	case <-ctx.Done():
-		return errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
-	default:
-	}
-
-	// make copy of call method
-	hcall := c.call
-
-	// use the router passed as a call option, or fallback to the rpc clients router
-	if callOpts.Router == nil {
-		callOpts.Router = c.opts.Router
-	}
-
-	if callOpts.Selector == nil {
-		callOpts.Selector = c.opts.Selector
-	}
-
-	// inject proxy address
-	// TODO: don't even bother using Lookup/Select in this case
-	if len(c.opts.Proxy) > 0 {
-		callOpts.Address = []string{c.opts.Proxy}
-	}
-
-	var next selector.Next
-
-	// return errors.New("go.micro.client", "request timeout", 408)
-	call := func(i int) error {
-		// call backoff first. Someone may want an initial start delay
-		t, err := callOpts.Backoff(ctx, req, i)
-		if err != nil {
-			return errors.InternalServerError("go.micro.client", "%+v", err)
-		}
-
-		// only sleep if greater than 0
-		if t.Seconds() > 0 {
-			time.Sleep(t)
-		}
-
-		if next == nil {
-			var routes []string
-			// lookup the route to send the reques to
-			// TODO apply any filtering here
-			routes, err = c.opts.Lookup(ctx, req, callOpts)
-			if err != nil {
-				return errors.InternalServerError("go.micro.client", "%+v", err)
-			}
-
-			// balance the list of nodes
-			next, err = callOpts.Selector.Select(routes)
-			if err != nil {
-				return err
-			}
-		}
-
-		node := next()
-
-		// make the call
-		err = hcall(ctx, node, req, rsp, callOpts)
-		// record the result of the call to inform future routing decisions
-		if verr := c.opts.Selector.Record(node, err); verr != nil {
-			return verr
-		}
-
-		// try and transform the error to a go-micro error
-		if verr, ok := err.(*errors.Error); ok {
-			return verr
-		}
-
-		return err
-	}
-
-	ch := make(chan error, callOpts.Retries)
-	var gerr error
-
-	for i := 0; i <= callOpts.Retries; i++ {
-		go func() {
-			ch <- call(i)
-		}()
-
-		select {
-		case <-ctx.Done():
-			return errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
-		case err := <-ch:
-			// if the call succeeded lets bail early
-			if err == nil {
-				return nil
-			}
-
-			retry, rerr := callOpts.Retry(ctx, req, i, err)
-			if rerr != nil {
-				return rerr
-			}
-
-			if !retry {
-				return err
-			}
-
-			gerr = err
-		}
-	}
-
-	return gerr
-}
-
-func (c *Client) Stream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
-	ts := time.Now()
-	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
-	var sp tracer.Span
-	ctx, sp = c.opts.Tracer.Start(ctx, req.Endpoint()+" rpc-client",
-		tracer.WithSpanKind(tracer.SpanKindClient),
-		tracer.WithSpanLabels("endpoint", req.Endpoint()),
-	)
-	stream, err := c.funcStream(ctx, req, opts...)
-	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Dec()
-	te := time.Since(ts)
-	c.opts.Meter.Summary(semconv.ClientRequestLatencyMicroseconds, "endpoint", req.Endpoint()).Update(te.Seconds())
-	c.opts.Meter.Histogram(semconv.ClientRequestDurationSeconds, "endpoint", req.Endpoint()).Update(te.Seconds())
-
-	if me := errors.FromError(err); me == nil {
-		sp.Finish()
-		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "success", "code", strconv.Itoa(int(200))).Inc()
-	} else {
-		sp.SetStatus(tracer.SpanStatusError, err.Error())
-		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "failure", "code", strconv.Itoa(int(me.Code))).Inc()
-	}
-
-	return stream, err
-}
-
-func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
-	var err error
-
-	// make a copy of call opts
-	callOpts := c.opts.CallOptions
-	for _, o := range opts {
-		o(&callOpts)
-	}
-
-	// check if we already have a deadline
-	d, ok := ctx.Deadline()
-	if !ok && callOpts.StreamTimeout > time.Duration(0) {
-		var cancel context.CancelFunc
-		// no deadline so we create a new one
-		ctx, cancel = context.WithTimeout(ctx, callOpts.StreamTimeout)
-		defer cancel()
-	} else {
-		// got a deadline so no need to setup context
-		// but we need to set the timeout we pass along
-		o := client.WithStreamTimeout(time.Until(d))
-		o(&callOpts)
-	}
-
-	// should we noop right here?
-	select {
-	case <-ctx.Done():
-		return nil, errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
-	default:
-	}
-
-	/*
-		// make copy of call method
-		hstream := h.stream
-		// wrap the call in reverse
-		for i := len(callOpts.CallWrappers); i > 0; i-- {
-			hstream = callOpts.CallWrappers[i-1](hstream)
-		}
-	*/
-
-	// use the router passed as a call option, or fallback to the rpc clients router
-	if callOpts.Router == nil {
-		callOpts.Router = c.opts.Router
-	}
-
-	if callOpts.Selector == nil {
-		callOpts.Selector = c.opts.Selector
-	}
-
-	// inject proxy address
-	// TODO: don't even bother using Lookup/Select in this case
-	if len(c.opts.Proxy) > 0 {
-		callOpts.Address = []string{c.opts.Proxy}
-	}
-
-	var next selector.Next
-
-	call := func(i int) (client.Stream, error) {
-		// call backoff first. Someone may want an initial start delay
-		t, cerr := callOpts.Backoff(ctx, req, i)
-		if cerr != nil {
-			return nil, errors.InternalServerError("go.micro.client", "%+v", cerr)
-		}
-
-		// only sleep if greater than 0
-		if t.Seconds() > 0 {
-			time.Sleep(t)
-		}
-
-		if next == nil {
-			var routes []string
-			// lookup the route to send the reques to
-			// TODO apply any filtering here
-			routes, err = c.opts.Lookup(ctx, req, callOpts)
-			if err != nil {
-				return nil, errors.InternalServerError("go.micro.client", "%+v", err)
-			}
-
-			// balance the list of nodes
-			next, err = callOpts.Selector.Select(routes)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		node := next()
-
-		stream, cerr := c.stream(ctx, node, req, callOpts)
-
-		// record the result of the call to inform future routing decisions
-		if verr := c.opts.Selector.Record(node, cerr); verr != nil {
-			return nil, verr
-		}
-
-		// try and transform the error to a go-micro error
-		if verr, ok := cerr.(*errors.Error); ok {
-			return nil, verr
-		}
-
-		return stream, cerr
-	}
-
-	type response struct {
-		stream client.Stream
-		err    error
-	}
-
-	ch := make(chan response, callOpts.Retries)
-	var grr error
-
-	for i := 0; i <= callOpts.Retries; i++ {
-		go func() {
-			s, cerr := call(i)
-			ch <- response{s, cerr}
-		}()
-
-		select {
-		case <-ctx.Done():
-			return nil, errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
-		case rsp := <-ch:
-			// if the call succeeded lets bail early
-			if rsp.err == nil {
-				return rsp.stream, nil
-			}
-
-			retry, rerr := callOpts.Retry(ctx, req, i, err)
-			if rerr != nil {
-				return nil, rerr
-			}
-
-			if !retry {
-				return nil, rsp.err
-			}
-
-			grr = rsp.err
-		}
-	}
-
-	return nil, grr
-}
-
-func (c *Client) String() string {
-	return "http"
-}
-
-func (c *Client) Name() string {
-	return c.opts.Name
 }
