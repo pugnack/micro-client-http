@@ -323,7 +323,7 @@ func newTemplate(path string) ([]string, error) {
 	return tpl, nil
 }
 
-func (h *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
+func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
 	var err error
 	var buf []byte
 
@@ -352,23 +352,23 @@ func (h *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interfac
 		if hrsp.Body != nil {
 			buf, err = io.ReadAll(hrsp.Body)
 			if err != nil {
-				if h.opts.Logger.V(logger.ErrorLevel) {
-					h.opts.Logger.Error(ctx, "failed to read body", err)
+				if c.opts.Logger.V(logger.ErrorLevel) {
+					c.opts.Logger.Error(ctx, "failed to read body", err)
 				}
 				return errors.InternalServerError("go.micro.client", "%s", buf)
 			}
 		}
 
-		cf, cerr := h.newCodec(ct)
+		cf, cerr := c.newCodec(ct)
 		if cerr != nil {
-			if h.opts.Logger.V(logger.DebugLevel) {
-				h.opts.Logger.Debug(ctx, fmt.Sprintf("response with %v unknown content-type %s %s", hrsp.Header, ct, buf))
+			if c.opts.Logger.V(logger.DebugLevel) {
+				c.opts.Logger.Debug(ctx, fmt.Sprintf("response with %v unknown content-type %s %s", hrsp.Header, ct, buf))
 			}
 			return errors.InternalServerError("go.micro.client", "%+v", cerr)
 		}
 
-		if h.opts.Logger.V(logger.DebugLevel) {
-			h.opts.Logger.Debug(ctx, fmt.Sprintf("response %s with %v", buf, hrsp.Header))
+		if c.opts.Logger.V(logger.DebugLevel) {
+			c.opts.Logger.Debug(ctx, fmt.Sprintf("response %s with %v", buf, hrsp.Header))
 		}
 
 		// succeseful response
