@@ -1,5 +1,5 @@
 // Package http provides a http client
-package http // import "go.unistack.org/micro-client-http/v3"
+package http
 
 import (
 	"bufio"
@@ -29,13 +29,6 @@ import (
 )
 
 var DefaultContentType = "application/json"
-
-/*
-func filterLabel(r []router.Route) []router.Route {
-	//				selector.FilterLabel("protocol", "http")
-	return r
-}
-*/
 
 type httpClient struct {
 	funcCall   client.FuncCall
@@ -108,7 +101,7 @@ func newRequest(ctx context.Context, log logger.Logger, addr string, req client.
 	if len(tags) == 0 {
 		switch ct {
 		default:
-			tags = append(tags, "json", "protobuf")
+			tags = append(tags, "protobuf")
 		case "text/xml":
 			tags = append(tags, "xml")
 		}

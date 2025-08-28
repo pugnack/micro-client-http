@@ -89,6 +89,12 @@ func newPathRequest(path string, method string, body string, msg interface{}, ta
 	// copy cycle
 
 	cleanPath := make(map[string]bool)
+
+	var (
+		bodyOverride    interface{}
+		bodyOverrideSet bool
+	)
+
 	for i := 0; i < tmsg.NumField(); i++ {
 		val := tmsg.Field(i)
 		if val.IsZero() {
@@ -96,14 +102,9 @@ func newPathRequest(path string, method string, body string, msg interface{}, ta
 		}
 		fld := tmsg.Type().Field(i)
 		// Skip unexported fields.
-		if fld.PkgPath != "" {
-			continue
-		}
-		/* check for empty PkgPath can be replaced with new method IsExported
 		if !fld.IsExported() {
 			continue
 		}
-		*/
 		t := &tag{}
 		for _, tn := range tags {
 			ts, ok := fld.Tag.Lookup(tn)
@@ -116,8 +117,10 @@ func newPathRequest(path string, method string, body string, msg interface{}, ta
 			switch tn {
 			case "protobuf": // special
 				for _, p := range tp {
-					if idx := strings.Index(p, "name="); idx > 0 {
-						t = &tag{key: tn, name: p[idx:]}
+					prefix := "json="
+					if strings.HasPrefix(p, prefix) {
+						t = &tag{key: tn, name: p[len(prefix):]}
+						break
 					}
 				}
 			default:
@@ -202,7 +205,21 @@ func newPathRequest(path string, method string, body string, msg interface{}, ta
 			}
 			if (body == "*" || body == t.name) && method != http.MethodGet {
 				if tnmsg.Field(i).CanSet() {
-					tnmsg.Field(i).Set(val)
+					if body == t.name {
+						switch val.Kind() {
+						case reflect.Ptr:
+							if !val.IsNil() && val.Elem().Kind() == reflect.Struct {
+								bodyOverride = val.Interface()
+								bodyOverrideSet = true
+							} else {
+								tnmsg.Field(i).Set(val)
+							}
+						default:
+							tnmsg.Field(i).Set(val)
+						}
+					} else {
+						tnmsg.Field(i).Set(val)
+					}
 				}
 			} else if method == http.MethodGet {
 				if val.Type().Kind() == reflect.Slice {
@@ -263,6 +280,10 @@ func newPathRequest(path string, method string, body string, msg interface{}, ta
 	if len(values) > 0 {
 		_, _ = b.WriteRune('?')
 		_, _ = b.WriteString(values.Encode())
+	}
+
+	if bodyOverrideSet {
+		return b.String(), bodyOverride, nil
 	}
 
 	// rutil.ZeroEmpty(tnmsg.Interface())
