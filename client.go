@@ -33,7 +33,7 @@ var DefaultContentType = "application/json"
 type httpClient struct {
 	funcCall   client.FuncCall
 	funcStream client.FuncStream
-	httpcli    *http.Client
+	httpClient *http.Client
 	opts       client.Options
 	mu         sync.RWMutex
 }
@@ -241,7 +241,7 @@ func (c *httpClient) call(ctx context.Context, addr string, req client.Request, 
 	}
 
 	// make the request
-	hrsp, err := c.httpcli.Do(hreq)
+	hrsp, err := c.httpClient.Do(hreq)
 	if err != nil {
 		switch err := err.(type) {
 		case *url.Error:
@@ -273,7 +273,7 @@ func (c *httpClient) stream(ctx context.Context, addr string, req client.Request
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
 	}
 
-	cc, err := (c.httpcli.Transport).(*http.Transport).DialContext(ctx, "tcp", addr)
+	cc, err := (c.httpClient.Transport).(*http.Transport).DialContext(ctx, "tcp", addr)
 	if err != nil {
 		return nil, errors.InternalServerError("go.micro.client", "Error dialing: %v", err)
 	}
@@ -691,7 +691,7 @@ func NewClient(opts ...client.Option) *httpClient {
 	}
 
 	if httpcli, ok := options.Context.Value(httpClientKey{}).(*http.Client); ok {
-		c.httpcli = httpcli
+		c.httpClient = httpcli
 	} else {
 		// TODO customTransport := http.DefaultTransport.(*http.Transport).Clone()
 		tr := &http.Transport{
@@ -707,7 +707,7 @@ func NewClient(opts ...client.Option) *httpClient {
 			ExpectContinueTimeout: 1 * time.Second,
 			TLSClientConfig:       options.TLSConfig,
 		}
-		c.httpcli = &http.Client{Transport: tr}
+		c.httpClient = &http.Client{Transport: tr}
 	}
 
 	c.funcCall = c.fnCall
