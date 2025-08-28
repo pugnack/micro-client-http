@@ -1,19 +1,13 @@
 package http
 
 import (
-	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
 	"sync"
 
-	"go.unistack.org/micro/v4/client"
-	"go.unistack.org/micro/v4/errors"
-	"go.unistack.org/micro/v4/logger"
-	"go.unistack.org/micro/v4/metadata"
 	rutil "go.unistack.org/micro/v4/util/reflect"
 )
 
@@ -321,89 +315,6 @@ func newTemplate(path string) ([]string, error) {
 	mu.Unlock()
 
 	return tpl, nil
-}
-
-func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
-	var err error
-	var buf []byte
-
-	// fast path return
-	if hrsp.StatusCode == http.StatusNoContent {
-		return nil
-	}
-
-	if opts.ResponseMetadata != nil {
-		*opts.ResponseMetadata = metadata.New(len(hrsp.Header))
-		for k, v := range hrsp.Header {
-			opts.ResponseMetadata.Set(k, strings.Join(v, ","))
-		}
-	}
-
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-	default:
-		ct := DefaultContentType
-
-		if htype := hrsp.Header.Get("Content-Type"); htype != "" {
-			ct = htype
-		}
-
-		if hrsp.Body != nil {
-			buf, err = io.ReadAll(hrsp.Body)
-			if err != nil {
-				if c.opts.Logger.V(logger.ErrorLevel) {
-					c.opts.Logger.Error(ctx, "failed to read body", err)
-				}
-				return errors.InternalServerError("go.micro.client", "%s", buf)
-			}
-		}
-
-		cf, cerr := c.newCodec(ct)
-		if cerr != nil {
-			if c.opts.Logger.V(logger.DebugLevel) {
-				c.opts.Logger.Debug(ctx, fmt.Sprintf("response with %v unknown content-type %s %s", hrsp.Header, ct, buf))
-			}
-			return errors.InternalServerError("go.micro.client", "%+v", cerr)
-		}
-
-		if c.opts.Logger.V(logger.DebugLevel) {
-			c.opts.Logger.Debug(ctx, fmt.Sprintf("response %s with %v", buf, hrsp.Header))
-		}
-
-		// succeseful response
-		if hrsp.StatusCode < 400 {
-			if err = cf.Unmarshal(buf, rsp); err != nil {
-				return errors.InternalServerError("go.micro.client", "%+v", err)
-			}
-			return nil
-		}
-
-		// response with error
-		var rerr interface{}
-		errmap, ok := opts.Context.Value(errorMapKey{}).(map[string]interface{})
-		if ok && errmap != nil {
-			rerr, ok = errmap[fmt.Sprintf("%d", hrsp.StatusCode)]
-			if !ok {
-				rerr, ok = errmap["default"]
-			}
-		}
-
-		if !ok || rerr == nil {
-			return errors.New("go.micro.client", string(buf), int32(hrsp.StatusCode))
-		}
-
-		if cerr := cf.Unmarshal(buf, rerr); cerr != nil {
-			return errors.InternalServerError("go.micro.client", "%+v", cerr)
-		}
-
-		if err, ok = rerr.(error); !ok {
-			err = &Error{rerr}
-		}
-
-	}
-
-	return err
 }
 
 type tag struct {

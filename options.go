@@ -117,8 +117,14 @@ func Body(b string) client.CallOption {
 
 type errorMapKey struct{}
 
-func ErrorMap(m map[string]interface{}) client.CallOption {
+func ErrorMap(m map[string]error) client.CallOption {
 	return client.SetCallOption(errorMapKey{}, m)
+}
+
+// errorMapFromOpts extracts error map from client call options.
+func errorMapFromOpts(opts client.CallOptions) (map[string]error, bool) {
+	errMap, ok := opts.Context.Value(errorMapKey{}).(map[string]error)
+	return errMap, ok
 }
 
 type structTagsKey struct{}

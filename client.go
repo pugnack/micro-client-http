@@ -514,6 +514,77 @@ func (c *Client) stream(ctx context.Context, addr string, req client.Request, op
 	}, nil
 }
 
+func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
+	log := c.opts.Logger
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
+	var buf []byte
+
+	if opts.ResponseMetadata != nil {
+		for k, v := range hrsp.Header {
+			opts.ResponseMetadata.Set(k, strings.Join(v, ","))
+		}
+	}
+
+	if hrsp.StatusCode == http.StatusNoContent {
+		return nil
+	}
+
+	ct := DefaultContentType
+	if htype := hrsp.Header.Get("Content-Type"); htype != "" {
+		ct = htype
+	}
+
+	if hrsp.Body != nil {
+		var err error
+		buf, err = io.ReadAll(hrsp.Body)
+		if err != nil {
+			return errors.InternalServerError("go.micro.client", "failed to read body: %v", err)
+		}
+	}
+
+	cf, err := c.newCodec(ct)
+	if err != nil {
+		return errors.InternalServerError("go.micro.client", "unknown content-type %s: %v", ct, err)
+	}
+
+	if log.V(logger.DebugLevel) {
+		log.Debug(ctx, fmt.Sprintf("response with headers: %v and body: %s", hrsp.Header, string(buf)))
+	}
+
+	if hrsp.StatusCode < 400 {
+		if err = cf.Unmarshal(buf, rsp); err != nil {
+			return errors.InternalServerError("go.micro.client", "failed to unmarshal response: %v", err)
+		}
+		return nil
+	}
+
+	var mappedErr error
+
+	errMap, ok := errorMapFromOpts(opts)
+	if ok && errMap != nil {
+		mappedErr, ok = errMap[fmt.Sprintf("%d", hrsp.StatusCode)]
+		if !ok {
+			mappedErr, ok = errMap["default"]
+		}
+	}
+
+	if !ok || mappedErr == nil {
+		return errors.New("go.micro.client", string(buf), int32(hrsp.StatusCode))
+	}
+
+	if err = cf.Unmarshal(buf, mappedErr); err != nil {
+		return errors.InternalServerError("go.micro.client", "failed to unmarshal error: %v", err)
+	}
+
+	return mappedErr
+}
+
 func newRequest(ctx context.Context, log logger.Logger, addr string, req client.Request, ct string, cf codec.Codec, msg interface{}, opts client.CallOptions) (*http.Request, error) {
 	var tags []string
 	var parameters map[string]map[string]string
