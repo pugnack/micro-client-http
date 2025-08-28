@@ -323,7 +323,7 @@ func newTemplate(path string) ([]string, error) {
 	return tpl, nil
 }
 
-func (h *httpClient) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
+func (h *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
 	var err error
 	var buf []byte
 

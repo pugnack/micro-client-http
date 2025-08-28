@@ -30,12 +30,56 @@ import (
 
 var DefaultContentType = "application/json"
 
-type httpClient struct {
+type Client struct {
 	funcCall   client.FuncCall
 	funcStream client.FuncStream
 	httpClient *http.Client
 	opts       client.Options
 	mu         sync.RWMutex
+}
+
+func NewClient(opts ...client.Option) *Client {
+	clientOpts := client.NewOptions(opts...)
+
+	if len(clientOpts.ContentType) == 0 {
+		clientOpts.ContentType = DefaultContentType
+	}
+
+	c := &Client{opts: clientOpts}
+
+	dialer, ok := httpDialerFromOpts(clientOpts)
+	if !ok {
+		dialer = func(ctx context.Context, addr string) (net.Conn, error) {
+			d := &net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+			}
+			return d.DialContext(ctx, "tcp", addr)
+		}
+	}
+
+	c.httpClient, ok = httpClientFromOpts(clientOpts)
+	if !ok {
+		tr := &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+				return dialer(ctx, addr)
+			},
+			ForceAttemptHTTP2:     true,
+			MaxConnsPerHost:       100,
+			MaxIdleConns:          20,
+			IdleConnTimeout:       60 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			TLSClientConfig:       clientOpts.TLSConfig,
+		}
+		c.httpClient = &http.Client{Transport: tr}
+	}
+
+	c.funcCall = c.fnCall
+	c.funcStream = c.fnStream
+
+	return c
 }
 
 func newRequest(ctx context.Context, log logger.Logger, addr string, req client.Request, ct string, cf codec.Codec, msg interface{}, opts client.CallOptions) (*http.Request, error) {
@@ -225,7 +269,7 @@ func newRequest(ctx context.Context, log logger.Logger, addr string, req client.
 	return hreq, nil
 }
 
-func (c *httpClient) call(ctx context.Context, addr string, req client.Request, rsp interface{}, opts client.CallOptions) error {
+func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp interface{}, opts client.CallOptions) error {
 	ct := req.ContentType()
 	if len(opts.ContentType) > 0 {
 		ct = opts.ContentType
@@ -261,7 +305,7 @@ func (c *httpClient) call(ctx context.Context, addr string, req client.Request, 
 	return c.parseRsp(ctx, hrsp, rsp, opts)
 }
 
-func (c *httpClient) stream(ctx context.Context, addr string, req client.Request, opts client.CallOptions) (client.Stream, error) {
+func (c *Client) stream(ctx context.Context, addr string, req client.Request, opts client.CallOptions) (client.Stream, error) {
 	ct := req.ContentType()
 	if len(opts.ContentType) > 0 {
 		ct = opts.ContentType
@@ -292,7 +336,7 @@ func (c *httpClient) stream(ctx context.Context, addr string, req client.Request
 	}, nil
 }
 
-func (c *httpClient) newCodec(ct string) (codec.Codec, error) {
+func (c *Client) newCodec(ct string) (codec.Codec, error) {
 	c.mu.RLock()
 
 	if idx := strings.IndexRune(ct, ';'); idx >= 0 {
@@ -308,7 +352,7 @@ func (c *httpClient) newCodec(ct string) (codec.Codec, error) {
 	return nil, codec.ErrUnknownContentType
 }
 
-func (c *httpClient) Init(opts ...client.Option) error {
+func (c *Client) Init(opts ...client.Option) error {
 	for _, o := range opts {
 		o(&c.opts)
 	}
@@ -328,15 +372,15 @@ func (c *httpClient) Init(opts ...client.Option) error {
 	return nil
 }
 
-func (c *httpClient) Options() client.Options {
+func (c *Client) Options() client.Options {
 	return c.opts
 }
 
-func (c *httpClient) NewRequest(service, method string, req interface{}, opts ...client.RequestOption) client.Request {
+func (c *Client) NewRequest(service, method string, req interface{}, opts ...client.RequestOption) client.Request {
 	return newHTTPRequest(service, method, req, c.opts.ContentType, opts...)
 }
 
-func (c *httpClient) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+func (c *Client) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
 	ts := time.Now()
 	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
 	var sp tracer.Span
@@ -361,7 +405,7 @@ func (c *httpClient) Call(ctx context.Context, req client.Request, rsp interface
 	return err
 }
 
-func (c *httpClient) fnCall(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
 	// make a copy of call opts
 	callOpts := c.opts.CallOptions
 	for _, opt := range opts {
@@ -488,7 +532,7 @@ func (c *httpClient) fnCall(ctx context.Context, req client.Request, rsp interfa
 	return gerr
 }
 
-func (c *httpClient) Stream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
+func (c *Client) Stream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
 	ts := time.Now()
 	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
 	var sp tracer.Span
@@ -513,7 +557,7 @@ func (c *httpClient) Stream(ctx context.Context, req client.Request, opts ...cli
 	return stream, err
 }
 
-func (c *httpClient) fnStream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
+func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
 	var err error
 
 	// make a copy of call opts
@@ -653,65 +697,10 @@ func (c *httpClient) fnStream(ctx context.Context, req client.Request, opts ...c
 	return nil, grr
 }
 
-func (c *httpClient) String() string {
+func (c *Client) String() string {
 	return "http"
 }
 
-func (c *httpClient) Name() string {
+func (c *Client) Name() string {
 	return c.opts.Name
-}
-
-func NewClient(opts ...client.Option) *httpClient {
-	options := client.NewOptions(opts...)
-
-	if len(options.ContentType) == 0 {
-		options.ContentType = DefaultContentType
-	}
-
-	c := &httpClient{
-		opts: options,
-	}
-
-	var dialer func(context.Context, string) (net.Conn, error)
-	if v, ok := options.Context.Value(httpDialerKey{}).(*net.Dialer); ok {
-		dialer = func(ctx context.Context, addr string) (net.Conn, error) {
-			return v.DialContext(ctx, "tcp", addr)
-		}
-	}
-	if options.ContextDialer != nil {
-		dialer = options.ContextDialer
-	}
-	if dialer == nil {
-		dialer = func(ctx context.Context, addr string) (net.Conn, error) {
-			return (&net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}).DialContext(ctx, "tcp", addr)
-		}
-	}
-
-	if httpcli, ok := options.Context.Value(httpClientKey{}).(*http.Client); ok {
-		c.httpClient = httpcli
-	} else {
-		// TODO customTransport := http.DefaultTransport.(*http.Transport).Clone()
-		tr := &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return dialer(ctx, addr)
-			},
-			ForceAttemptHTTP2:     true,
-			MaxConnsPerHost:       100,
-			MaxIdleConns:          20,
-			IdleConnTimeout:       60 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-			TLSClientConfig:       options.TLSConfig,
-		}
-		c.httpClient = &http.Client{Transport: tr}
-	}
-
-	c.funcCall = c.fnCall
-	c.funcStream = c.fnStream
-
-	return c
 }

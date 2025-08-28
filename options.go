@@ -1,6 +1,7 @@
 package http
 
 import (
+	"context"
 	"net"
 	"net/http"
 
@@ -62,12 +63,35 @@ func HTTPClient(c *http.Client) client.Option {
 	return client.SetOption(httpClientKey{}, c)
 }
 
+// httpClientFromOpts extracts http client from client options.
+func httpClientFromOpts(opts client.Options) (*http.Client, bool) {
+	httpClient, ok := opts.Context.Value(httpClientKey{}).(*http.Client)
+	return httpClient, ok
+}
+
 type httpDialerKey struct{}
 
 // nolint: golint
 // HTTPDialer pass net.Dialer option to client
 func HTTPDialer(d *net.Dialer) client.Option {
 	return client.SetOption(httpDialerKey{}, d)
+}
+
+// httpDialerFromOpts extracts dialer func from client options.
+func httpDialerFromOpts(opts client.Options) (dialerFunc func(context.Context, string) (net.Conn, error), ok bool) {
+	var d *net.Dialer
+
+	if d, ok = opts.Context.Value(httpDialerKey{}).(*net.Dialer); ok {
+		dialerFunc = func(ctx context.Context, addr string) (net.Conn, error) {
+			return d.DialContext(ctx, "tcp", addr)
+		}
+	}
+
+	if opts.ContextDialer != nil {
+		dialerFunc, ok = opts.ContextDialer, true
+	}
+
+	return dialerFunc, ok
 }
 
 type methodKey struct{}
