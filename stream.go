@@ -67,7 +67,7 @@ func (h *httpStream) Send(msg interface{}) error {
 		return errShutdown
 	}
 
-	hreq, err := newRequest(h.context, h.logger, h.address, h.request, h.ct, h.cf, msg, h.opts)
+	hreq, err := buildHTTPRequest(h.context, h.address, h.request.Endpoint(), h.ct, h.cf, msg, h.opts, h.logger)
 	if err != nil {
 		return err
 	}

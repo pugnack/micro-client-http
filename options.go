@@ -2,11 +2,12 @@ package http
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"net/http"
+	"time"
 
 	"go.unistack.org/micro/v4/client"
-	"go.unistack.org/micro/v4/metadata"
 )
 
 var (
@@ -69,6 +70,26 @@ func httpClientFromOpts(opts client.Options) (*http.Client, bool) {
 	return httpClient, ok
 }
 
+func defaultHTTPClient(
+	dialer func(ctx context.Context, addr string) (net.Conn, error),
+	tlsConfig *tls.Config,
+) *http.Client {
+	tr := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
+			return dialer(ctx, addr)
+		},
+		ForceAttemptHTTP2:     true,
+		MaxConnsPerHost:       100,
+		MaxIdleConns:          20,
+		IdleConnTimeout:       60 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig:       tlsConfig,
+	}
+	return &http.Client{Transport: tr}
+}
+
 type httpDialerKey struct{}
 
 // nolint: golint
@@ -94,6 +115,16 @@ func httpDialerFromOpts(opts client.Options) (dialerFunc func(context.Context, s
 	return dialerFunc, ok
 }
 
+func defaultHTTPDialer() func(ctx context.Context, addr string) (net.Conn, error) {
+	return func(ctx context.Context, addr string) (net.Conn, error) {
+		d := &net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
+		return d.DialContext(ctx, "tcp", addr)
+	}
+}
+
 type methodKey struct{}
 
 // Method pass method option to client Call
@@ -101,11 +132,21 @@ func Method(m string) client.CallOption {
 	return client.SetCallOption(methodKey{}, m)
 }
 
+func methodFromOpts(opts client.CallOptions) (string, bool) {
+	m, ok := opts.Context.Value(methodKey{}).(string)
+	return m, ok
+}
+
 type pathKey struct{}
 
-// Path spcecifies path option to client Call
+// Path specifies path option to client Call
 func Path(p string) client.CallOption {
 	return client.SetCallOption(pathKey{}, p)
+}
+
+func pathFromOpts(opts client.CallOptions) (string, bool) {
+	p, ok := opts.Context.Value(pathKey{}).(string)
+	return p, ok
 }
 
 type bodyKey struct{}
@@ -113,6 +154,11 @@ type bodyKey struct{}
 // Body specifies body option to client Call
 func Body(b string) client.CallOption {
 	return client.SetCallOption(bodyKey{}, b)
+}
+
+func bodyFromOpts(opts client.CallOptions) (string, bool) {
+	b, ok := opts.Context.Value(bodyKey{}).(string)
+	return b, ok
 }
 
 type errorMapKey struct{}
@@ -127,20 +173,6 @@ func errorMapFromOpts(opts client.CallOptions) (map[string]error, bool) {
 	return errMap, ok
 }
 
-type structTagsKey struct{}
-
-// StructTags pass tags slice option to client Call
-func StructTags(tags []string) client.CallOption {
-	return client.SetCallOption(structTagsKey{}, tags)
-}
-
-type metadataKey struct{}
-
-// Metadata pass metadata to client Call
-func Metadata(md metadata.Metadata) client.CallOption {
-	return client.SetCallOption(metadataKey{}, md)
-}
-
 type cookieKey struct{}
 
 // Cookie pass cookie to client Call
@@ -148,9 +180,19 @@ func Cookie(cookies ...string) client.CallOption {
 	return client.SetCallOption(cookieKey{}, cookies)
 }
 
+func cookieFromOpts(opts client.CallOptions) ([]string, bool) {
+	c, ok := opts.Context.Value(cookieKey{}).([]string)
+	return c, ok
+}
+
 type headerKey struct{}
 
 // Header pass cookie to client Call
 func Header(headers ...string) client.CallOption {
 	return client.SetCallOption(headerKey{}, headers)
+}
+
+func headerFromOpts(opts client.CallOptions) ([]string, bool) {
+	h, ok := opts.Context.Value(headerKey{}).([]string)
+	return h, ok
 }

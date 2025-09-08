@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	stderr "errors"
 	"fmt"
 	"io"
 	"net"
@@ -16,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"go.unistack.org/micro-client-http/v4/builder"
 	"go.unistack.org/micro/v4/client"
 	"go.unistack.org/micro/v4/codec"
 	"go.unistack.org/micro/v4/errors"
@@ -25,7 +25,7 @@ import (
 	"go.unistack.org/micro/v4/selector"
 	"go.unistack.org/micro/v4/semconv"
 	"go.unistack.org/micro/v4/tracer"
-	rutil "go.unistack.org/micro/v4/util/reflect"
+	"google.golang.org/protobuf/proto"
 )
 
 var DefaultContentType = "application/json"
@@ -49,31 +49,12 @@ func NewClient(opts ...client.Option) *Client {
 
 	dialer, ok := httpDialerFromOpts(clientOpts)
 	if !ok {
-		dialer = func(ctx context.Context, addr string) (net.Conn, error) {
-			d := &net.Dialer{
-				Timeout:   30 * time.Second,
-				KeepAlive: 30 * time.Second,
-			}
-			return d.DialContext(ctx, "tcp", addr)
-		}
+		dialer = defaultHTTPDialer()
 	}
 
 	c.httpClient, ok = httpClientFromOpts(clientOpts)
 	if !ok {
-		tr := &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
-				return dialer(ctx, addr)
-			},
-			ForceAttemptHTTP2:     true,
-			MaxConnsPerHost:       100,
-			MaxIdleConns:          20,
-			IdleConnTimeout:       60 * time.Second,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-			TLSClientConfig:       clientOpts.TLSConfig,
-		}
-		c.httpClient = &http.Client{Transport: tr}
+		c.httpClient = defaultHTTPClient(dialer, clientOpts.TLSConfig)
 	}
 
 	c.funcCall = c.fnCall
@@ -108,7 +89,17 @@ func (c *Client) Options() client.Options {
 }
 
 func (c *Client) NewRequest(service, method string, req interface{}, opts ...client.RequestOption) client.Request {
-	return newHTTPRequest(service, method, req, c.opts.ContentType, opts...)
+	reqOpts := client.NewRequestOptions(opts...)
+	if reqOpts.ContentType == "" {
+		reqOpts.ContentType = c.opts.ContentType
+	}
+
+	return &httpRequest{
+		service: service,
+		method:  method,
+		request: req,
+		opts:    reqOpts,
+	}
 }
 
 func (c *Client) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
@@ -317,7 +308,8 @@ func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp 
 	if err != nil {
 		return errors.BadRequest("go.micro.client", "%+v", err)
 	}
-	hreq, err := newRequest(ctx, c.opts.Logger, addr, req, ct, cf, req.Body(), opts)
+
+	hreq, err := buildHTTPRequest(ctx, addr, req.Endpoint(), ct, cf, req.Body(), opts, c.opts.Logger)
 	if err != nil {
 		return err
 	}
@@ -536,7 +528,7 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interfac
 	}
 
 	ct := DefaultContentType
-	if htype := hrsp.Header.Get("Content-Type"); htype != "" {
+	if htype := hrsp.Header.Get(metadata.HeaderContentType); htype != "" {
 		ct = htype
 	}
 
@@ -554,10 +546,10 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interfac
 	}
 
 	if log.V(logger.DebugLevel) {
-		log.Debug(ctx, fmt.Sprintf("response with headers: %v and body: %s", hrsp.Header, string(buf)))
+		log.Debug(ctx, fmt.Sprintf("response with headers: %v and body: %s", hrsp.Header, buf))
 	}
 
-	if hrsp.StatusCode < 400 {
+	if hrsp.StatusCode < http.StatusBadRequest {
 		if err = cf.Unmarshal(buf, rsp); err != nil {
 			return errors.InternalServerError("go.micro.client", "failed to unmarshal response: %v", err)
 		}
@@ -585,172 +577,112 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interfac
 	return mappedErr
 }
 
-func newRequest(ctx context.Context, log logger.Logger, addr string, req client.Request, ct string, cf codec.Codec, msg interface{}, opts client.CallOptions) (*http.Request, error) {
-	var tags []string
-	var parameters map[string]map[string]string
-	scheme := "http"
-	method := http.MethodPost
-	body := "*" // as like google api http annotation
-	host := addr
-	path := req.Endpoint()
-
-	u, err := url.Parse(addr)
-	if err == nil {
-		scheme = u.Scheme
-		path = u.Path
-		host = u.Host
-	} else {
-		u = &url.URL{Scheme: scheme, Path: path, Host: host}
+func buildHTTPRequest(
+	ctx context.Context,
+	addr string,
+	path string,
+	ct string,
+	cf codec.Codec,
+	msg interface{},
+	opts client.CallOptions,
+	log logger.Logger,
+) (
+	*http.Request,
+	error,
+) {
+	protoMsg, ok := msg.(proto.Message)
+	if !ok {
+		return nil, errors.BadRequest("go.micro.client", "msg is not a proto message type")
 	}
 
-	// nolint: nestif
+	var (
+		method  = http.MethodPost
+		bodyOpt = "*"
+
+		parameters = map[string]map[string]string{}
+	)
+
 	if opts.Context != nil {
-		if m, ok := opts.Context.Value(methodKey{}).(string); ok {
-			method = m
+		if v, ok := methodFromOpts(opts); ok {
+			method = v
 		}
-		if p, ok := opts.Context.Value(pathKey{}).(string); ok {
-			path += p
+		if v, ok := pathFromOpts(opts); ok {
+			path = v
 		}
-		if b, ok := opts.Context.Value(bodyKey{}).(string); ok {
-			body = b
+		if v, ok := bodyFromOpts(opts); ok {
+			bodyOpt = v
 		}
-		if t, ok := opts.Context.Value(structTagsKey{}).([]string); ok && len(t) > 0 {
-			tags = t
-		}
-		if k, ok := opts.Context.Value(headerKey{}).([]string); ok && len(k) > 0 {
-			if parameters == nil {
-				parameters = make(map[string]map[string]string)
-			}
+		if h, ok := headerFromOpts(opts); ok && len(h) > 0 {
 			m, ok := parameters["header"]
 			if !ok {
 				m = make(map[string]string)
 				parameters["header"] = m
 			}
-			for idx := 0; idx+1 < len(k); idx += 2 {
-				m[k[idx]] = k[idx+1]
+			for idx := 0; idx+1 < len(h); idx += 2 {
+				m[h[idx]] = h[idx+1]
 			}
 		}
-		if k, ok := opts.Context.Value(cookieKey{}).([]string); ok && len(k) > 0 {
-			if parameters == nil {
-				parameters = make(map[string]map[string]string)
-			}
+		if c, ok := cookieFromOpts(opts); ok && len(c) > 0 {
 			m, ok := parameters["cookie"]
 			if !ok {
 				m = make(map[string]string)
 				parameters["cookie"] = m
 			}
-			for idx := 0; idx+1 < len(k); idx += 2 {
-				m[k[idx]] = k[idx+1]
+			for idx := 0; idx+1 < len(c); idx += 2 {
+				m[c[idx]] = c[idx+1]
 			}
 		}
 	}
 
-	if len(tags) == 0 {
-		switch ct {
-		default:
-			tags = append(tags, "protobuf")
-		case "text/xml":
-			tags = append(tags, "xml")
-		}
+	reqBuilder, err := builder.NewRequestBuilder(path, method, bodyOpt, protoMsg)
+	if err != nil {
+		return nil, errors.BadRequest("go.micro.client", "new request builder: %+v", err)
 	}
 
-	if path == "" {
-		path = req.Endpoint()
+	resolvedPath, newMsg, err := reqBuilder.Build()
+	if err != nil {
+		return nil, errors.BadRequest("go.micro.client", "request build: %+v", err)
 	}
 
-	u, err = u.Parse(path)
+	u, err := url.Parse(fmt.Sprintf("%s%s", addr, resolvedPath))
 	if err != nil {
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
 	}
 
-	var nmsg interface{}
-	if len(u.Query()) > 0 {
-		path, nmsg, err = newPathRequest(u.Path+"?"+u.RawQuery, method, body, msg, tags, parameters)
-	} else {
-		path, nmsg, err = newPathRequest(u.Path, method, body, msg, tags, parameters)
-	}
-
-	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
-	}
-
-	u, err = url.Parse(fmt.Sprintf("%s://%s%s", scheme, host, path))
-	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
-	}
-
-	var cookies []*http.Cookie
 	header := make(http.Header)
-	if opts.Context != nil {
-		if md, ok := opts.Context.Value(metadataKey{}).(metadata.Metadata); ok {
-			for k, v := range md {
-				header[k] = append(header[k], v...)
-			}
-		}
-	}
+	header.Set(metadata.HeaderContentType, ct)
 	if opts.AuthToken != "" {
 		header.Set(metadata.HeaderAuthorization, opts.AuthToken)
 	}
-	if opts.RequestMetadata != nil {
-		for k, v := range opts.RequestMetadata {
-			header[k] = append(header[k], v...)
-		}
-	}
-
-	if md, ok := metadata.FromOutgoingContext(ctx); ok {
-		for k, v := range md {
-			header[k] = append(header[k], v...)
-		}
-	}
-
-	// set timeout in nanoseconds
 	if opts.StreamTimeout > time.Duration(0) {
 		header.Set(metadata.HeaderTimeout, fmt.Sprintf("%d", opts.StreamTimeout))
 	}
 	if opts.RequestTimeout > time.Duration(0) {
 		header.Set(metadata.HeaderTimeout, fmt.Sprintf("%d", opts.RequestTimeout))
 	}
-
-	// set the content type for the request
-	header.Set(metadata.HeaderContentType, ct)
-	var v interface{}
-
-	for km, vm := range parameters {
-		for k, required := range vm {
-			v, err = rutil.StructFieldByPath(msg, k)
-			if stderr.Is(err, rutil.ErrNotFound) {
-				// Note: check the `json_name` in the `protobuf` tag for headers with hyphens,
-				// since struct fields cannot contain hyphens.
-				v, err = rutil.StructFieldByTag(msg, "protobuf", fmt.Sprintf("json=%s", k))
-			}
-			if err != nil {
-				return nil, errors.BadRequest("go.micro.client", "%+v", err)
-			}
-			if rutil.IsZero(v) {
-				if required == "true" {
-					return nil, errors.BadRequest("go.micro.client", "required field %s not set", k)
-				}
-				continue
-			}
-
-			switch km {
-			case "header":
-				header.Set(k, fmt.Sprintf("%v", v))
-			case "cookie":
-				cookies = append(cookies, &http.Cookie{Name: k, Value: fmt.Sprintf("%v", v)})
-			}
+	if opts.RequestMetadata != nil {
+		for k, v := range opts.RequestMetadata {
+			header[k] = append(header[k], v...)
+		}
+	}
+	if md, ok := metadata.FromOutgoingContext(ctx); ok {
+		for k, v := range md {
+			header[k] = append(header[k], v...)
 		}
 	}
 
-	b, err := cf.Marshal(nmsg)
+	// TODO: add validation of headers and cookies
+
+	reqBody, err := cf.Marshal(newMsg)
 	if err != nil {
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
 	}
 
 	var hreq *http.Request
-	if len(b) > 0 {
-		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), io.NopCloser(bytes.NewBuffer(b)))
-		hreq.ContentLength = int64(len(b))
+
+	if len(reqBody) > 0 {
+		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), io.NopCloser(bytes.NewBuffer(reqBody)))
+		hreq.ContentLength = int64(len(reqBody))
 		header.Set("Content-Length", fmt.Sprintf("%d", hreq.ContentLength))
 	} else {
 		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), nil)
@@ -761,12 +693,12 @@ func newRequest(ctx context.Context, log logger.Logger, addr string, req client.
 	}
 
 	hreq.Header = header
-	for _, cookie := range cookies {
-		hreq.AddCookie(cookie)
-	}
 
 	if log.V(logger.DebugLevel) {
-		log.Debug(ctx, fmt.Sprintf("request %s to %s with headers %v body %s", method, u.String(), hreq.Header, b))
+		log.Debug(
+			ctx,
+			fmt.Sprintf("request %s to %s with headers %v body %s", method, u.String(), hreq.Header, reqBody),
+		)
 	}
 
 	return hreq, nil
