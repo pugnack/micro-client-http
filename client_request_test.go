@@ -59,6 +59,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
+					w.Header().Set("My-Header", "My-Header-Value")
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
@@ -100,6 +101,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
+					w.Header().Set("My-Header", "My-Header-Value")
 					w.WriteHeader(http.StatusBadRequest)
 
 					resp := map[string]interface{}{
@@ -141,6 +143,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
+					w.Header().Set("My-Header", "My-Header-Value")
 					w.WriteHeader(http.StatusForbidden)
 
 					resp := map[string]interface{}{
@@ -176,6 +179,8 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 				)
 				req = &request{UserId: "user-id-1", OrderId: 123}
 				rsp = &response{}
+
+				respMetadata = metadata.Metadata{}
 			)
 
 			err := httpClient.Call(
@@ -183,6 +188,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 				httpClient.NewRequest("test.service", "Test.Call", req),
 				rsp,
 				client.WithAddress(server.URL),
+				client.WithResponseMetadata(&respMetadata),
 				httpcli.Method(http.MethodPost),
 				httpcli.Path("/user/products"),
 				httpcli.Body("*"),
@@ -199,6 +205,9 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 				require.NoError(t, err)
 				require.True(t, proto.Equal(tt.expectedRsp, rsp))
 			}
+
+			require.Equal(t, "application/json", respMetadata.GetJoined("Content-Type"))
+			require.Equal(t, "My-Header-Value", respMetadata.GetJoined("My-Header"))
 		})
 	}
 }
