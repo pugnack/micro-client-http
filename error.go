@@ -6,6 +6,6 @@ type Error struct {
 	err any
 }
 
-func (err *Error) Error() string {
-	return fmt.Sprintf("%+v", err.err)
+func (e *Error) Error() string {
+	return fmt.Sprintf("%+v", e.err)
 }
