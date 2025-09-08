@@ -15,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"go.unistack.org/micro-client-http/v4/builder"
 	"go.unistack.org/micro/v4/client"
 	"go.unistack.org/micro/v4/codec"
 	"go.unistack.org/micro/v4/errors"
@@ -26,6 +25,8 @@ import (
 	"go.unistack.org/micro/v4/semconv"
 	"go.unistack.org/micro/v4/tracer"
 	"google.golang.org/protobuf/proto"
+
+	"go.unistack.org/micro-client-http/v4/builder"
 )
 
 var DefaultContentType = "application/json"
