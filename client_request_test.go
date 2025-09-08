@@ -2,7 +2,6 @@ package http_test
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -118,7 +117,7 @@ func TestClient_Call(t *testing.T) {
 					require.NoError(t, err)
 				}))
 			},
-			expectedErr: &defaultError{Code: "default-error-code", Msg: "default-error-msg"},
+			expectedErr: &defaultError{Code: "default-error-code", Msg: "default-error-message"},
 		},
 		{
 			name: "special error",
@@ -160,7 +159,7 @@ func TestClient_Call(t *testing.T) {
 					require.NoError(t, err)
 				}))
 			},
-			expectedErr: &specialError{Code: "special-error-code", Msg: "special-error-msg", Warning: "special-error-warning"},
+			expectedErr: &specialError{Code: "special-error-code", Msg: "special-error-message", Warning: "special-error-warning"},
 		},
 	}
 
@@ -187,13 +186,13 @@ func TestClient_Call(t *testing.T) {
 				httpcli.Path("/user/products"),
 				httpcli.Body("*"),
 				httpcli.ErrorMap(map[string]any{
-					"default": &pb.Test_Client_Call_DefaultError{},
-					"403":     &pb.Test_Client_Call_SpecialError{},
+					"default": &defaultError{},
+					"403":     &specialError{},
 				}),
 			)
 
 			if tt.expectedErr != nil {
-				fmt.Println(err)
+				require.Equal(t, tt.expectedErr.Error(), err.Error())
 			} else {
 				require.NoError(t, err)
 				require.True(t, proto.Equal(tt.expectedRsp, rsp))
