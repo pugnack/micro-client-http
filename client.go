@@ -590,7 +590,7 @@ func buildHTTPRequest(
 ) {
 	protoMsg, ok := msg.(proto.Message)
 	if !ok {
-		return nil, errors.BadRequest("go.micro.client", "msg is not a proto message type")
+		return nil, errors.BadRequest("go.micro.client", "msg must be a proto message type")
 	}
 
 	var (
