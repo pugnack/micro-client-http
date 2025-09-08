@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	jsoncodec "go.unistack.org/micro-codec-json/v4"
@@ -494,4 +495,44 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestClient_Call_TimeoutError(t *testing.T) {
+	type (
+		request  = pb.Test_Client_Call_Request
+		response = pb.Test_Client_Call_Response
+	)
+
+	serverMock := func() *httptest.Server {
+		return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(2 * time.Millisecond)
+		}))
+	}
+
+	server := serverMock()
+	defer server.Close()
+
+	httpClient := httpcli.NewClient(
+		client.Name("http"),
+		client.ContentType("application/json"),
+		client.Codec("application/json", jsoncodec.NewCodec()),
+	)
+
+	var (
+		ctx = context.Background()
+		req = &request{UserId: "user-id-1", OrderId: 123}
+		rsp = &response{}
+	)
+
+	err := httpClient.Call(
+		ctx,
+		httpClient.NewRequest("test.service", "Test.Call", req),
+		rsp,
+		client.WithAddress(server.URL),
+		client.WithRequestTimeout(time.Millisecond),
+		httpcli.Method(http.MethodPost),
+		httpcli.Path("/user/products"),
+		httpcli.Body("*"),
+	)
+	require.Error(t, err)
 }
