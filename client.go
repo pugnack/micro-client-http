@@ -647,30 +647,6 @@ func buildHTTPRequest(
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
 	}
 
-	header := make(http.Header)
-	header.Set(metadata.HeaderContentType, ct)
-	if opts.AuthToken != "" {
-		header.Set(metadata.HeaderAuthorization, opts.AuthToken)
-	}
-	if opts.StreamTimeout > time.Duration(0) {
-		header.Set(metadata.HeaderTimeout, fmt.Sprintf("%d", opts.StreamTimeout))
-	}
-	if opts.RequestTimeout > time.Duration(0) {
-		header.Set(metadata.HeaderTimeout, fmt.Sprintf("%d", opts.RequestTimeout))
-	}
-	if opts.RequestMetadata != nil {
-		for k, v := range opts.RequestMetadata {
-			header[k] = append(header[k], v...)
-		}
-	}
-	if md, ok := metadata.FromOutgoingContext(ctx); ok {
-		for k, v := range md {
-			header[k] = append(header[k], v...)
-		}
-	}
-
-	// TODO: add validation of headers and cookies
-
 	reqBody, err := cf.Marshal(newMsg)
 	if err != nil {
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
@@ -681,7 +657,6 @@ func buildHTTPRequest(
 	if len(reqBody) > 0 {
 		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), io.NopCloser(bytes.NewBuffer(reqBody)))
 		hreq.ContentLength = int64(len(reqBody))
-		header.Set("Content-Length", fmt.Sprintf("%d", hreq.ContentLength))
 	} else {
 		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), nil)
 	}
@@ -690,7 +665,10 @@ func buildHTTPRequest(
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
 	}
 
-	hreq.Header = header
+	setHeadersAndCookies(ctx, hreq, ct, opts)
+	if err = validateHeadersAndCookies(hreq, parameters); err != nil {
+		return nil, errors.BadRequest("go.micro.client", "%+v", err)
+	}
 
 	if log.V(logger.DebugLevel) {
 		log.Debug(
@@ -700,4 +678,84 @@ func buildHTTPRequest(
 	}
 
 	return hreq, nil
+}
+
+func setHeadersAndCookies(ctx context.Context, r *http.Request, ct string, opts client.CallOptions) {
+	r.Header = make(http.Header)
+
+	r.Header.Set(metadata.HeaderContentType, ct)
+	r.Header.Set("Content-Length", fmt.Sprintf("%d", r.ContentLength))
+
+	if opts.AuthToken != "" {
+		r.Header.Set(metadata.HeaderAuthorization, opts.AuthToken)
+	}
+
+	if opts.StreamTimeout > time.Duration(0) {
+		r.Header.Set(metadata.HeaderTimeout, fmt.Sprintf("%d", opts.StreamTimeout))
+	}
+	if opts.RequestTimeout > time.Duration(0) {
+		r.Header.Set(metadata.HeaderTimeout, fmt.Sprintf("%d", opts.RequestTimeout))
+	}
+
+	if opts.RequestMetadata != nil {
+		for k, v := range opts.RequestMetadata {
+			if k == "Cookie" {
+				applyCookies(r, v)
+				continue
+			}
+			r.Header[k] = append(r.Header[k], v...)
+		}
+	}
+
+	if md, ok := metadata.FromOutgoingContext(ctx); ok {
+		for k, v := range md {
+			if k == "Cookie" {
+				applyCookies(r, v)
+				continue
+			}
+			r.Header[k] = append(r.Header[k], v...)
+		}
+	}
+}
+
+func applyCookies(r *http.Request, rawCookies []string) {
+	if len(rawCookies) == 0 {
+		return
+	}
+
+	raw := strings.Join(rawCookies, "; ")
+
+	tmp := http.Request{Header: http.Header{}}
+	tmp.Header.Set("Cookie", raw)
+
+	for _, c := range tmp.Cookies() {
+		r.AddCookie(c)
+	}
+}
+
+func validateHeadersAndCookies(r *http.Request, parameters map[string]map[string]string) error {
+	if headers, ok := parameters["header"]; ok {
+		for name, required := range headers {
+			if required == "true" && r.Header.Get(name) == "" {
+				return fmt.Errorf("missing required header: %s", name)
+			}
+		}
+	}
+
+	if cookies, ok := parameters["cookie"]; ok {
+		cookieMap := map[string]string{}
+		for _, c := range r.Cookies() {
+			cookieMap[c.Name] = c.Value
+		}
+
+		for name, required := range cookies {
+			if required == "true" {
+				if _, ok := cookieMap[name]; !ok {
+					return fmt.Errorf("missing required cookie: %s", name)
+				}
+			}
+		}
+	}
+
+	return nil
 }
