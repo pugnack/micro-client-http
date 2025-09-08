@@ -315,7 +315,6 @@ func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp 
 		return err
 	}
 
-	// make the request
 	hrsp, err := c.httpClient.Do(hreq)
 	if err != nil {
 		switch err := err.(type) {
