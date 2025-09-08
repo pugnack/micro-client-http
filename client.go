@@ -219,7 +219,6 @@ func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}
 
 	var next selector.Next
 
-	// return errors.New("go.micro.client", "request timeout", 408)
 	call := func(i int) error {
 		// call backoff first. Someone may want an initial start delay
 		t, err := callOpts.Backoff(ctx, req, i)
@@ -252,6 +251,7 @@ func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}
 
 		// make the call
 		err = hcall(ctx, node, req, rsp, callOpts)
+
 		// record the result of the call to inform future routing decisions
 		if verr := c.opts.Selector.Record(node, err); verr != nil {
 			return verr
@@ -340,8 +340,8 @@ func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...clien
 
 	// make a copy of call opts
 	callOpts := c.opts.CallOptions
-	for _, o := range opts {
-		o(&callOpts)
+	for _, opt := range opts {
+		opt(&callOpts)
 	}
 
 	// check if we already have a deadline
@@ -364,15 +364,6 @@ func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...clien
 		return nil, errors.New("go.micro.client", fmt.Sprintf("%v", ctx.Err()), 408)
 	default:
 	}
-
-	/*
-		// make copy of call method
-		hstream := h.stream
-		// wrap the call in reverse
-		for i := len(callOpts.CallWrappers); i > 0; i-- {
-			hstream = callOpts.CallWrappers[i-1](hstream)
-		}
-	*/
 
 	// use the router passed as a call option, or fallback to the rpc clients router
 	if callOpts.Router == nil {
@@ -421,6 +412,7 @@ func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...clien
 
 		node := next()
 
+		// init stream
 		stream, cerr := c.stream(ctx, node, req, callOpts)
 
 		// record the result of the call to inform future routing decisions
