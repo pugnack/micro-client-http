@@ -114,12 +114,12 @@ func bodyFromOpts(opts client.CallOptions) (string, bool) {
 // ErrorMap option
 type errorMapKey struct{}
 
-func ErrorMap(m map[string]error) client.CallOption {
+func ErrorMap(m map[string]any) client.CallOption {
 	return client.SetCallOption(errorMapKey{}, m)
 }
 
-func errorMapFromOpts(opts client.CallOptions) (map[string]error, bool) {
-	errMap, ok := opts.Context.Value(errorMapKey{}).(map[string]error)
+func errorMapFromOpts(opts client.CallOptions) (map[string]any, bool) {
+	errMap, ok := opts.Context.Value(errorMapKey{}).(map[string]any)
 	return errMap, ok
 }
 

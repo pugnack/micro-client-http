@@ -54,11 +54,11 @@ func (h *httpStream) Response() client.Response {
 	return nil
 }
 
-func (h *httpStream) SendMsg(msg interface{}) error {
+func (h *httpStream) SendMsg(msg any) error {
 	return h.Send(msg)
 }
 
-func (h *httpStream) Send(msg interface{}) error {
+func (h *httpStream) Send(msg any) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -75,11 +75,11 @@ func (h *httpStream) Send(msg interface{}) error {
 	return hreq.Write(h.conn)
 }
 
-func (h *httpStream) RecvMsg(msg interface{}) error {
+func (h *httpStream) RecvMsg(msg any) error {
 	return h.Recv(msg)
 }
 
-func (h *httpStream) Recv(msg interface{}) error {
+func (h *httpStream) Recv(msg any) error {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -117,7 +117,7 @@ func (h *httpStream) Close() error {
 	}
 }
 
-func (h *httpStream) parseRsp(ctx context.Context, log logger.Logger, hrsp *http.Response, cf codec.Codec, rsp interface{}, opts client.CallOptions) error {
+func (h *httpStream) parseRsp(ctx context.Context, log logger.Logger, hrsp *http.Response, cf codec.Codec, rsp any, opts client.CallOptions) error {
 	var err error
 	var buf []byte
 
@@ -151,8 +151,8 @@ func (h *httpStream) parseRsp(ctx context.Context, log logger.Logger, hrsp *http
 			return nil
 		}
 
-		var rerr interface{}
-		errmap, ok := opts.Context.Value(errorMapKey{}).(map[string]interface{})
+		var rerr any
+		errmap, ok := opts.Context.Value(errorMapKey{}).(map[string]any)
 		if ok && errmap != nil {
 			if rerr, ok = errmap[fmt.Sprintf("%d", hrsp.StatusCode)].(error); !ok {
 				rerr, ok = errmap["default"].(error)

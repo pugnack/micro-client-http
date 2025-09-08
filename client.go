@@ -88,7 +88,7 @@ func (c *Client) Options() client.Options {
 	return c.opts
 }
 
-func (c *Client) NewRequest(service, method string, req interface{}, opts ...client.RequestOption) client.Request {
+func (c *Client) NewRequest(service, method string, req any, opts ...client.RequestOption) client.Request {
 	reqOpts := client.NewRequestOptions(opts...)
 	if reqOpts.ContentType == "" {
 		reqOpts.ContentType = c.opts.ContentType
@@ -102,7 +102,7 @@ func (c *Client) NewRequest(service, method string, req interface{}, opts ...cli
 	}
 }
 
-func (c *Client) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+func (c *Client) Call(ctx context.Context, req client.Request, rsp any, opts ...client.CallOption) error {
 	ts := time.Now()
 	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
 	var sp tracer.Span
@@ -171,7 +171,7 @@ func (c *Client) newCodec(ct string) (codec.Codec, error) {
 	return nil, codec.ErrUnknownContentType
 }
 
-func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+func (c *Client) fnCall(ctx context.Context, req client.Request, rsp any, opts ...client.CallOption) error {
 	// make a copy of call opts
 	callOpts := c.opts.CallOptions
 	for _, opt := range opts {
@@ -298,7 +298,7 @@ func (c *Client) fnCall(ctx context.Context, req client.Request, rsp interface{}
 	return gerr
 }
 
-func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp interface{}, opts client.CallOptions) error {
+func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp any, opts client.CallOptions) error {
 	ct := req.ContentType()
 	if len(opts.ContentType) > 0 {
 		ct = opts.ContentType
@@ -498,7 +498,7 @@ func (c *Client) stream(ctx context.Context, addr string, req client.Request, op
 	}, nil
 }
 
-func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interface{}, opts client.CallOptions) error {
+func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp any, opts client.CallOptions) error {
 	log := c.opts.Logger
 
 	select {
@@ -548,7 +548,7 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interfac
 		return nil
 	}
 
-	var mappedErr error
+	var mappedErr any
 
 	errMap, ok := errorMapFromOpts(opts)
 	if ok && errMap != nil {
@@ -566,7 +566,12 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp interfac
 		return errors.InternalServerError("go.micro.client", "failed to unmarshal error: %v", err)
 	}
 
-	return mappedErr
+	if v, ok := mappedErr.(error); ok {
+		return v
+	}
+
+	// if the error map item does not implement the error interface, wrap it
+	return &Error{err: mappedErr}
 }
 
 func buildHTTPRequest(
@@ -575,7 +580,7 @@ func buildHTTPRequest(
 	path string,
 	ct string,
 	cf codec.Codec,
-	msg interface{},
+	msg any,
 	opts client.CallOptions,
 	log logger.Logger,
 ) (

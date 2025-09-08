@@ -42,7 +42,7 @@ or you can call any rest api or site and unmarshal to response struct
 client := client.NewClientCallOptions(http.NewClient(), http.Address("https://api.github.com"))
 
 req := client.NewRequest("github", "/users/vtolstov", nil)
-rsp := make(map[string]interface{})
+rsp := make(map[string]any)
 
 err := c.Call(context.TODO(), req, &rsp, mhttp.Method(http.MethodGet)) 
 ```

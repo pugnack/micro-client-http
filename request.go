@@ -8,7 +8,7 @@ import (
 type httpRequest struct {
 	service string
 	method  string
-	request interface{}
+	request any
 	opts    client.RequestOptions
 }
 
@@ -28,7 +28,7 @@ func (h *httpRequest) ContentType() string {
 	return h.opts.ContentType
 }
 
-func (h *httpRequest) Body() interface{} {
+func (h *httpRequest) Body() any {
 	return h.request
 }
 
