@@ -10,7 +10,7 @@ import (
 	"go.unistack.org/micro/v4/client"
 )
 
-// HTTPClient option
+// --------------------------------------------- HTTPClient option -----------------------------------------------------
 type httpClientKey struct{}
 
 func HTTPClient(c *http.Client) client.Option {
@@ -42,6 +42,7 @@ func defaultHTTPClient(
 	return &http.Client{Transport: tr}
 }
 
+// --------------------------------------------- HTTPClient option -----------------------------------------------------
 // HTTPDialer option
 type httpDialerKey struct{}
 
@@ -75,7 +76,7 @@ func defaultHTTPDialer() func(ctx context.Context, addr string) (net.Conn, error
 	}
 }
 
-// Method option
+// ----------------------------------------------- Method option -------------------------------------------------------
 type methodKey struct{}
 
 func Method(m string) client.CallOption {
@@ -87,7 +88,7 @@ func methodFromOpts(opts client.CallOptions) (string, bool) {
 	return m, ok
 }
 
-// Path option
+// ------------------------------------------------ Path option --------------------------------------------------------
 type pathKey struct{}
 
 func Path(p string) client.CallOption {
@@ -99,7 +100,7 @@ func pathFromOpts(opts client.CallOptions) (string, bool) {
 	return p, ok
 }
 
-// Body option
+// ------------------------------------------------ Body option --------------------------------------------------------
 type bodyKey struct{}
 
 func Body(b string) client.CallOption {
@@ -111,7 +112,7 @@ func bodyFromOpts(opts client.CallOptions) (string, bool) {
 	return b, ok
 }
 
-// ErrorMap option
+// ---------------------------------------------- ErrorMap option ------------------------------------------------------
 type errorMapKey struct{}
 
 func ErrorMap(m map[string]any) client.CallOption {
@@ -123,7 +124,7 @@ func errorMapFromOpts(opts client.CallOptions) (map[string]any, bool) {
 	return errMap, ok
 }
 
-// Cookie option
+// ------------------------------------------------ Cookie option ------------------------------------------------------
 type cookieKey struct{}
 
 func Cookie(cookies ...string) client.CallOption {
@@ -135,7 +136,7 @@ func cookieFromOpts(opts client.CallOptions) ([]string, bool) {
 	return c, ok
 }
 
-// Header option
+// ------------------------------------------------ Header option ------------------------------------------------------
 type headerKey struct{}
 
 func Header(headers ...string) client.CallOption {
