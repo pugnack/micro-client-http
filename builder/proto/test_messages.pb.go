@@ -237,6 +237,42 @@ func (*Benchmark) Descriptor() ([]byte, []int) {
 	return file_test_messages_proto_rawDescGZIP(), []int{5}
 }
 
+type Test_Client_Call struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Test_Client_Call) Reset() {
+	*x = Test_Client_Call{}
+	mi := &file_test_messages_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Test_Client_Call) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Test_Client_Call) ProtoMessage() {}
+
+func (x *Test_Client_Call) ProtoReflect() protoreflect.Message {
+	mi := &file_test_messages_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Test_Client_Call.ProtoReflect.Descriptor instead.
+func (*Test_Client_Call) Descriptor() ([]byte, []int) {
+	return file_test_messages_proto_rawDescGZIP(), []int{6}
+}
+
 type Test_PathOnly_PrimitiveCase struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        string                 `protobuf:"bytes,1,opt,name=userId,json=user_id,proto3" json:"userId,omitempty"`
@@ -247,7 +283,7 @@ type Test_PathOnly_PrimitiveCase struct {
 
 func (x *Test_PathOnly_PrimitiveCase) Reset() {
 	*x = Test_PathOnly_PrimitiveCase{}
-	mi := &file_test_messages_proto_msgTypes[6]
+	mi := &file_test_messages_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -259,7 +295,7 @@ func (x *Test_PathOnly_PrimitiveCase) String() string {
 func (*Test_PathOnly_PrimitiveCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_PrimitiveCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[6]
+	mi := &file_test_messages_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -299,7 +335,7 @@ type Test_PathOnly_NestedCase struct {
 
 func (x *Test_PathOnly_NestedCase) Reset() {
 	*x = Test_PathOnly_NestedCase{}
-	mi := &file_test_messages_proto_msgTypes[7]
+	mi := &file_test_messages_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -311,7 +347,7 @@ func (x *Test_PathOnly_NestedCase) String() string {
 func (*Test_PathOnly_NestedCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_NestedCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[7]
+	mi := &file_test_messages_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -351,7 +387,7 @@ type Test_PathOnly_MultipleCase struct {
 
 func (x *Test_PathOnly_MultipleCase) Reset() {
 	*x = Test_PathOnly_MultipleCase{}
-	mi := &file_test_messages_proto_msgTypes[8]
+	mi := &file_test_messages_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -363,7 +399,7 @@ func (x *Test_PathOnly_MultipleCase) String() string {
 func (*Test_PathOnly_MultipleCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_MultipleCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[8]
+	mi := &file_test_messages_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -403,7 +439,7 @@ type Test_PathOnly_RepeatedCase struct {
 
 func (x *Test_PathOnly_RepeatedCase) Reset() {
 	*x = Test_PathOnly_RepeatedCase{}
-	mi := &file_test_messages_proto_msgTypes[9]
+	mi := &file_test_messages_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -415,7 +451,7 @@ func (x *Test_PathOnly_RepeatedCase) String() string {
 func (*Test_PathOnly_RepeatedCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_RepeatedCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[9]
+	mi := &file_test_messages_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -455,7 +491,7 @@ type Test_PathOnly_NonPrimitiveMessageCase struct {
 
 func (x *Test_PathOnly_NonPrimitiveMessageCase) Reset() {
 	*x = Test_PathOnly_NonPrimitiveMessageCase{}
-	mi := &file_test_messages_proto_msgTypes[10]
+	mi := &file_test_messages_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -467,7 +503,7 @@ func (x *Test_PathOnly_NonPrimitiveMessageCase) String() string {
 func (*Test_PathOnly_NonPrimitiveMessageCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_NonPrimitiveMessageCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[10]
+	mi := &file_test_messages_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -507,7 +543,7 @@ type Test_PathOnly_NonPrimitiveMapCase struct {
 
 func (x *Test_PathOnly_NonPrimitiveMapCase) Reset() {
 	*x = Test_PathOnly_NonPrimitiveMapCase{}
-	mi := &file_test_messages_proto_msgTypes[11]
+	mi := &file_test_messages_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -519,7 +555,7 @@ func (x *Test_PathOnly_NonPrimitiveMapCase) String() string {
 func (*Test_PathOnly_NonPrimitiveMapCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_NonPrimitiveMapCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[11]
+	mi := &file_test_messages_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -558,7 +594,7 @@ type Test_PathOnly_PatternCase struct {
 
 func (x *Test_PathOnly_PatternCase) Reset() {
 	*x = Test_PathOnly_PatternCase{}
-	mi := &file_test_messages_proto_msgTypes[12]
+	mi := &file_test_messages_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -570,7 +606,7 @@ func (x *Test_PathOnly_PatternCase) String() string {
 func (*Test_PathOnly_PatternCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_PatternCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[12]
+	mi := &file_test_messages_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -604,7 +640,7 @@ type Test_PathOnly_CompositePatternCase struct {
 
 func (x *Test_PathOnly_CompositePatternCase) Reset() {
 	*x = Test_PathOnly_CompositePatternCase{}
-	mi := &file_test_messages_proto_msgTypes[13]
+	mi := &file_test_messages_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -616,7 +652,7 @@ func (x *Test_PathOnly_CompositePatternCase) String() string {
 func (*Test_PathOnly_CompositePatternCase) ProtoMessage() {}
 
 func (x *Test_PathOnly_CompositePatternCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[13]
+	mi := &file_test_messages_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -662,7 +698,7 @@ type Test_PathOnly_NestedCase_User struct {
 
 func (x *Test_PathOnly_NestedCase_User) Reset() {
 	*x = Test_PathOnly_NestedCase_User{}
-	mi := &file_test_messages_proto_msgTypes[14]
+	mi := &file_test_messages_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -674,7 +710,7 @@ func (x *Test_PathOnly_NestedCase_User) String() string {
 func (*Test_PathOnly_NestedCase_User) ProtoMessage() {}
 
 func (x *Test_PathOnly_NestedCase_User) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[14]
+	mi := &file_test_messages_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -707,7 +743,7 @@ type Test_PathOnly_NestedCase_Order struct {
 
 func (x *Test_PathOnly_NestedCase_Order) Reset() {
 	*x = Test_PathOnly_NestedCase_Order{}
-	mi := &file_test_messages_proto_msgTypes[15]
+	mi := &file_test_messages_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -719,7 +755,7 @@ func (x *Test_PathOnly_NestedCase_Order) String() string {
 func (*Test_PathOnly_NestedCase_Order) ProtoMessage() {}
 
 func (x *Test_PathOnly_NestedCase_Order) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[15]
+	mi := &file_test_messages_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -758,7 +794,7 @@ type Test_PathOnly_NestedCase_Order_Product struct {
 
 func (x *Test_PathOnly_NestedCase_Order_Product) Reset() {
 	*x = Test_PathOnly_NestedCase_Order_Product{}
-	mi := &file_test_messages_proto_msgTypes[16]
+	mi := &file_test_messages_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -770,7 +806,7 @@ func (x *Test_PathOnly_NestedCase_Order_Product) String() string {
 func (*Test_PathOnly_NestedCase_Order_Product) ProtoMessage() {}
 
 func (x *Test_PathOnly_NestedCase_Order_Product) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[16]
+	mi := &file_test_messages_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -802,7 +838,7 @@ type Test_PathOnly_MultipleCase_Order struct {
 
 func (x *Test_PathOnly_MultipleCase_Order) Reset() {
 	*x = Test_PathOnly_MultipleCase_Order{}
-	mi := &file_test_messages_proto_msgTypes[17]
+	mi := &file_test_messages_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -814,7 +850,7 @@ func (x *Test_PathOnly_MultipleCase_Order) String() string {
 func (*Test_PathOnly_MultipleCase_Order) ProtoMessage() {}
 
 func (x *Test_PathOnly_MultipleCase_Order) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[17]
+	mi := &file_test_messages_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -846,7 +882,7 @@ type Test_PathOnly_NonPrimitiveMessageCase_User struct {
 
 func (x *Test_PathOnly_NonPrimitiveMessageCase_User) Reset() {
 	*x = Test_PathOnly_NonPrimitiveMessageCase_User{}
-	mi := &file_test_messages_proto_msgTypes[18]
+	mi := &file_test_messages_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -858,7 +894,7 @@ func (x *Test_PathOnly_NonPrimitiveMessageCase_User) String() string {
 func (*Test_PathOnly_NonPrimitiveMessageCase_User) ProtoMessage() {}
 
 func (x *Test_PathOnly_NonPrimitiveMessageCase_User) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[18]
+	mi := &file_test_messages_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -892,7 +928,7 @@ type Test_QueryOnly_PrimitiveCase struct {
 
 func (x *Test_QueryOnly_PrimitiveCase) Reset() {
 	*x = Test_QueryOnly_PrimitiveCase{}
-	mi := &file_test_messages_proto_msgTypes[20]
+	mi := &file_test_messages_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -904,7 +940,7 @@ func (x *Test_QueryOnly_PrimitiveCase) String() string {
 func (*Test_QueryOnly_PrimitiveCase) ProtoMessage() {}
 
 func (x *Test_QueryOnly_PrimitiveCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[20]
+	mi := &file_test_messages_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -951,7 +987,7 @@ type Test_QueryOnly_RepeatedCase struct {
 
 func (x *Test_QueryOnly_RepeatedCase) Reset() {
 	*x = Test_QueryOnly_RepeatedCase{}
-	mi := &file_test_messages_proto_msgTypes[21]
+	mi := &file_test_messages_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -963,7 +999,7 @@ func (x *Test_QueryOnly_RepeatedCase) String() string {
 func (*Test_QueryOnly_RepeatedCase) ProtoMessage() {}
 
 func (x *Test_QueryOnly_RepeatedCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[21]
+	mi := &file_test_messages_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1003,7 +1039,7 @@ type Test_QueryOnly_NestedMessageCase struct {
 
 func (x *Test_QueryOnly_NestedMessageCase) Reset() {
 	*x = Test_QueryOnly_NestedMessageCase{}
-	mi := &file_test_messages_proto_msgTypes[22]
+	mi := &file_test_messages_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1015,7 +1051,7 @@ func (x *Test_QueryOnly_NestedMessageCase) String() string {
 func (*Test_QueryOnly_NestedMessageCase) ProtoMessage() {}
 
 func (x *Test_QueryOnly_NestedMessageCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[22]
+	mi := &file_test_messages_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1056,7 +1092,7 @@ type Test_QueryOnly_NestedMapCase struct {
 
 func (x *Test_QueryOnly_NestedMapCase) Reset() {
 	*x = Test_QueryOnly_NestedMapCase{}
-	mi := &file_test_messages_proto_msgTypes[23]
+	mi := &file_test_messages_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1068,7 +1104,7 @@ func (x *Test_QueryOnly_NestedMapCase) String() string {
 func (*Test_QueryOnly_NestedMapCase) ProtoMessage() {}
 
 func (x *Test_QueryOnly_NestedMapCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[23]
+	mi := &file_test_messages_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1117,7 +1153,7 @@ type Test_QueryOnly_MultipleCase struct {
 
 func (x *Test_QueryOnly_MultipleCase) Reset() {
 	*x = Test_QueryOnly_MultipleCase{}
-	mi := &file_test_messages_proto_msgTypes[24]
+	mi := &file_test_messages_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1129,7 +1165,7 @@ func (x *Test_QueryOnly_MultipleCase) String() string {
 func (*Test_QueryOnly_MultipleCase) ProtoMessage() {}
 
 func (x *Test_QueryOnly_MultipleCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[24]
+	mi := &file_test_messages_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1182,7 +1218,7 @@ type Test_QueryOnly_RepeatedMessageCase struct {
 
 func (x *Test_QueryOnly_RepeatedMessageCase) Reset() {
 	*x = Test_QueryOnly_RepeatedMessageCase{}
-	mi := &file_test_messages_proto_msgTypes[25]
+	mi := &file_test_messages_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1194,7 +1230,7 @@ func (x *Test_QueryOnly_RepeatedMessageCase) String() string {
 func (*Test_QueryOnly_RepeatedMessageCase) ProtoMessage() {}
 
 func (x *Test_QueryOnly_RepeatedMessageCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[25]
+	mi := &file_test_messages_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1228,7 +1264,7 @@ type Test_QueryOnly_NestedMessageCase_Filter struct {
 
 func (x *Test_QueryOnly_NestedMessageCase_Filter) Reset() {
 	*x = Test_QueryOnly_NestedMessageCase_Filter{}
-	mi := &file_test_messages_proto_msgTypes[26]
+	mi := &file_test_messages_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1240,7 +1276,7 @@ func (x *Test_QueryOnly_NestedMessageCase_Filter) String() string {
 func (*Test_QueryOnly_NestedMessageCase_Filter) ProtoMessage() {}
 
 func (x *Test_QueryOnly_NestedMessageCase_Filter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[26]
+	mi := &file_test_messages_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1287,7 +1323,7 @@ type Test_QueryOnly_NestedMessageCase_Filter_SubFilter struct {
 
 func (x *Test_QueryOnly_NestedMessageCase_Filter_SubFilter) Reset() {
 	*x = Test_QueryOnly_NestedMessageCase_Filter_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[27]
+	mi := &file_test_messages_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1299,7 +1335,7 @@ func (x *Test_QueryOnly_NestedMessageCase_Filter_SubFilter) String() string {
 func (*Test_QueryOnly_NestedMessageCase_Filter_SubFilter) ProtoMessage() {}
 
 func (x *Test_QueryOnly_NestedMessageCase_Filter_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[27]
+	mi := &file_test_messages_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1339,7 +1375,7 @@ type Test_QueryOnly_NestedMapCase_SubFilter struct {
 
 func (x *Test_QueryOnly_NestedMapCase_SubFilter) Reset() {
 	*x = Test_QueryOnly_NestedMapCase_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[30]
+	mi := &file_test_messages_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1351,7 +1387,7 @@ func (x *Test_QueryOnly_NestedMapCase_SubFilter) String() string {
 func (*Test_QueryOnly_NestedMapCase_SubFilter) ProtoMessage() {}
 
 func (x *Test_QueryOnly_NestedMapCase_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[30]
+	mi := &file_test_messages_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1391,7 +1427,7 @@ type Test_QueryOnly_MultipleCase_Filter struct {
 
 func (x *Test_QueryOnly_MultipleCase_Filter) Reset() {
 	*x = Test_QueryOnly_MultipleCase_Filter{}
-	mi := &file_test_messages_proto_msgTypes[32]
+	mi := &file_test_messages_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1403,7 +1439,7 @@ func (x *Test_QueryOnly_MultipleCase_Filter) String() string {
 func (*Test_QueryOnly_MultipleCase_Filter) ProtoMessage() {}
 
 func (x *Test_QueryOnly_MultipleCase_Filter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[32]
+	mi := &file_test_messages_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1442,7 +1478,7 @@ type Test_QueryOnly_MultipleCase_SubFilter struct {
 
 func (x *Test_QueryOnly_MultipleCase_SubFilter) Reset() {
 	*x = Test_QueryOnly_MultipleCase_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[33]
+	mi := &file_test_messages_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1454,7 +1490,7 @@ func (x *Test_QueryOnly_MultipleCase_SubFilter) String() string {
 func (*Test_QueryOnly_MultipleCase_SubFilter) ProtoMessage() {}
 
 func (x *Test_QueryOnly_MultipleCase_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[33]
+	mi := &file_test_messages_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1486,7 +1522,7 @@ type Test_QueryOnly_RepeatedMessageCase_Filter struct {
 
 func (x *Test_QueryOnly_RepeatedMessageCase_Filter) Reset() {
 	*x = Test_QueryOnly_RepeatedMessageCase_Filter{}
-	mi := &file_test_messages_proto_msgTypes[34]
+	mi := &file_test_messages_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1498,7 +1534,7 @@ func (x *Test_QueryOnly_RepeatedMessageCase_Filter) String() string {
 func (*Test_QueryOnly_RepeatedMessageCase_Filter) ProtoMessage() {}
 
 func (x *Test_QueryOnly_RepeatedMessageCase_Filter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[34]
+	mi := &file_test_messages_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1534,7 +1570,7 @@ type Test_BodyOnly_PrimitiveCase struct {
 
 func (x *Test_BodyOnly_PrimitiveCase) Reset() {
 	*x = Test_BodyOnly_PrimitiveCase{}
-	mi := &file_test_messages_proto_msgTypes[35]
+	mi := &file_test_messages_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1546,7 +1582,7 @@ func (x *Test_BodyOnly_PrimitiveCase) String() string {
 func (*Test_BodyOnly_PrimitiveCase) ProtoMessage() {}
 
 func (x *Test_BodyOnly_PrimitiveCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[35]
+	mi := &file_test_messages_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1608,7 +1644,7 @@ type Test_BodyOnly_NestedCase struct {
 
 func (x *Test_BodyOnly_NestedCase) Reset() {
 	*x = Test_BodyOnly_NestedCase{}
-	mi := &file_test_messages_proto_msgTypes[36]
+	mi := &file_test_messages_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1620,7 +1656,7 @@ func (x *Test_BodyOnly_NestedCase) String() string {
 func (*Test_BodyOnly_NestedCase) ProtoMessage() {}
 
 func (x *Test_BodyOnly_NestedCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[36]
+	mi := &file_test_messages_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1667,7 +1703,7 @@ type Test_BodyOnly_RepeatedMessageCase struct {
 
 func (x *Test_BodyOnly_RepeatedMessageCase) Reset() {
 	*x = Test_BodyOnly_RepeatedMessageCase{}
-	mi := &file_test_messages_proto_msgTypes[37]
+	mi := &file_test_messages_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1679,7 +1715,7 @@ func (x *Test_BodyOnly_RepeatedMessageCase) String() string {
 func (*Test_BodyOnly_RepeatedMessageCase) ProtoMessage() {}
 
 func (x *Test_BodyOnly_RepeatedMessageCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[37]
+	mi := &file_test_messages_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1719,7 +1755,7 @@ type Test_BodyOnly_MapCase struct {
 
 func (x *Test_BodyOnly_MapCase) Reset() {
 	*x = Test_BodyOnly_MapCase{}
-	mi := &file_test_messages_proto_msgTypes[38]
+	mi := &file_test_messages_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1731,7 +1767,7 @@ func (x *Test_BodyOnly_MapCase) String() string {
 func (*Test_BodyOnly_MapCase) ProtoMessage() {}
 
 func (x *Test_BodyOnly_MapCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[38]
+	mi := &file_test_messages_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1773,7 +1809,7 @@ type Test_BodyOnly_MultipleCase struct {
 
 func (x *Test_BodyOnly_MultipleCase) Reset() {
 	*x = Test_BodyOnly_MultipleCase{}
-	mi := &file_test_messages_proto_msgTypes[39]
+	mi := &file_test_messages_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1785,7 +1821,7 @@ func (x *Test_BodyOnly_MultipleCase) String() string {
 func (*Test_BodyOnly_MultipleCase) ProtoMessage() {}
 
 func (x *Test_BodyOnly_MultipleCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[39]
+	mi := &file_test_messages_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1839,7 +1875,7 @@ type Test_BodyOnly_PrimitiveCase_Product struct {
 
 func (x *Test_BodyOnly_PrimitiveCase_Product) Reset() {
 	*x = Test_BodyOnly_PrimitiveCase_Product{}
-	mi := &file_test_messages_proto_msgTypes[40]
+	mi := &file_test_messages_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1851,7 +1887,7 @@ func (x *Test_BodyOnly_PrimitiveCase_Product) String() string {
 func (*Test_BodyOnly_PrimitiveCase_Product) ProtoMessage() {}
 
 func (x *Test_BodyOnly_PrimitiveCase_Product) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[40]
+	mi := &file_test_messages_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1892,7 +1928,7 @@ type Test_BodyOnly_NestedCase_Filter struct {
 
 func (x *Test_BodyOnly_NestedCase_Filter) Reset() {
 	*x = Test_BodyOnly_NestedCase_Filter{}
-	mi := &file_test_messages_proto_msgTypes[41]
+	mi := &file_test_messages_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1904,7 +1940,7 @@ func (x *Test_BodyOnly_NestedCase_Filter) String() string {
 func (*Test_BodyOnly_NestedCase_Filter) ProtoMessage() {}
 
 func (x *Test_BodyOnly_NestedCase_Filter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[41]
+	mi := &file_test_messages_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1951,7 +1987,7 @@ type Test_BodyOnly_NestedCase_Filter_SubFilter struct {
 
 func (x *Test_BodyOnly_NestedCase_Filter_SubFilter) Reset() {
 	*x = Test_BodyOnly_NestedCase_Filter_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[42]
+	mi := &file_test_messages_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1963,7 +1999,7 @@ func (x *Test_BodyOnly_NestedCase_Filter_SubFilter) String() string {
 func (*Test_BodyOnly_NestedCase_Filter_SubFilter) ProtoMessage() {}
 
 func (x *Test_BodyOnly_NestedCase_Filter_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[42]
+	mi := &file_test_messages_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2003,7 +2039,7 @@ type Test_BodyOnly_RepeatedMessageCase_Product struct {
 
 func (x *Test_BodyOnly_RepeatedMessageCase_Product) Reset() {
 	*x = Test_BodyOnly_RepeatedMessageCase_Product{}
-	mi := &file_test_messages_proto_msgTypes[43]
+	mi := &file_test_messages_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2015,7 +2051,7 @@ func (x *Test_BodyOnly_RepeatedMessageCase_Product) String() string {
 func (*Test_BodyOnly_RepeatedMessageCase_Product) ProtoMessage() {}
 
 func (x *Test_BodyOnly_RepeatedMessageCase_Product) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[43]
+	mi := &file_test_messages_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2055,7 +2091,7 @@ type Test_BodyOnly_MapCase_SubFilter struct {
 
 func (x *Test_BodyOnly_MapCase_SubFilter) Reset() {
 	*x = Test_BodyOnly_MapCase_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[46]
+	mi := &file_test_messages_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2067,7 +2103,7 @@ func (x *Test_BodyOnly_MapCase_SubFilter) String() string {
 func (*Test_BodyOnly_MapCase_SubFilter) ProtoMessage() {}
 
 func (x *Test_BodyOnly_MapCase_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[46]
+	mi := &file_test_messages_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2107,7 +2143,7 @@ type Test_BodyOnly_MultipleCase_SubFilter struct {
 
 func (x *Test_BodyOnly_MultipleCase_SubFilter) Reset() {
 	*x = Test_BodyOnly_MultipleCase_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[48]
+	mi := &file_test_messages_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2119,7 +2155,7 @@ func (x *Test_BodyOnly_MultipleCase_SubFilter) String() string {
 func (*Test_BodyOnly_MultipleCase_SubFilter) ProtoMessage() {}
 
 func (x *Test_BodyOnly_MultipleCase_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[48]
+	mi := &file_test_messages_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2160,7 +2196,7 @@ type Test_Mixed_PrimitiveCase struct {
 
 func (x *Test_Mixed_PrimitiveCase) Reset() {
 	*x = Test_Mixed_PrimitiveCase{}
-	mi := &file_test_messages_proto_msgTypes[49]
+	mi := &file_test_messages_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2172,7 +2208,7 @@ func (x *Test_Mixed_PrimitiveCase) String() string {
 func (*Test_Mixed_PrimitiveCase) ProtoMessage() {}
 
 func (x *Test_Mixed_PrimitiveCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[49]
+	mi := &file_test_messages_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2220,7 +2256,7 @@ type Test_Mixed_NestedCase struct {
 
 func (x *Test_Mixed_NestedCase) Reset() {
 	*x = Test_Mixed_NestedCase{}
-	mi := &file_test_messages_proto_msgTypes[50]
+	mi := &file_test_messages_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2232,7 +2268,7 @@ func (x *Test_Mixed_NestedCase) String() string {
 func (*Test_Mixed_NestedCase) ProtoMessage() {}
 
 func (x *Test_Mixed_NestedCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[50]
+	mi := &file_test_messages_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2279,7 +2315,7 @@ type Test_Mixed_RepeatedMessageCase struct {
 
 func (x *Test_Mixed_RepeatedMessageCase) Reset() {
 	*x = Test_Mixed_RepeatedMessageCase{}
-	mi := &file_test_messages_proto_msgTypes[51]
+	mi := &file_test_messages_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2291,7 +2327,7 @@ func (x *Test_Mixed_RepeatedMessageCase) String() string {
 func (*Test_Mixed_RepeatedMessageCase) ProtoMessage() {}
 
 func (x *Test_Mixed_RepeatedMessageCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[51]
+	mi := &file_test_messages_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2331,7 +2367,7 @@ type Test_Mixed_MapCase struct {
 
 func (x *Test_Mixed_MapCase) Reset() {
 	*x = Test_Mixed_MapCase{}
-	mi := &file_test_messages_proto_msgTypes[52]
+	mi := &file_test_messages_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2343,7 +2379,7 @@ func (x *Test_Mixed_MapCase) String() string {
 func (*Test_Mixed_MapCase) ProtoMessage() {}
 
 func (x *Test_Mixed_MapCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[52]
+	mi := &file_test_messages_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2385,7 +2421,7 @@ type Test_Mixed_MultipleCase struct {
 
 func (x *Test_Mixed_MultipleCase) Reset() {
 	*x = Test_Mixed_MultipleCase{}
-	mi := &file_test_messages_proto_msgTypes[53]
+	mi := &file_test_messages_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2397,7 +2433,7 @@ func (x *Test_Mixed_MultipleCase) String() string {
 func (*Test_Mixed_MultipleCase) ProtoMessage() {}
 
 func (x *Test_Mixed_MultipleCase) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[53]
+	mi := &file_test_messages_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2451,7 +2487,7 @@ type Test_Mixed_PrimitiveCase_Product struct {
 
 func (x *Test_Mixed_PrimitiveCase_Product) Reset() {
 	*x = Test_Mixed_PrimitiveCase_Product{}
-	mi := &file_test_messages_proto_msgTypes[54]
+	mi := &file_test_messages_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2463,7 +2499,7 @@ func (x *Test_Mixed_PrimitiveCase_Product) String() string {
 func (*Test_Mixed_PrimitiveCase_Product) ProtoMessage() {}
 
 func (x *Test_Mixed_PrimitiveCase_Product) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[54]
+	mi := &file_test_messages_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2504,7 +2540,7 @@ type Test_Mixed_NestedCase_Filter struct {
 
 func (x *Test_Mixed_NestedCase_Filter) Reset() {
 	*x = Test_Mixed_NestedCase_Filter{}
-	mi := &file_test_messages_proto_msgTypes[55]
+	mi := &file_test_messages_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2516,7 +2552,7 @@ func (x *Test_Mixed_NestedCase_Filter) String() string {
 func (*Test_Mixed_NestedCase_Filter) ProtoMessage() {}
 
 func (x *Test_Mixed_NestedCase_Filter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[55]
+	mi := &file_test_messages_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2563,7 +2599,7 @@ type Test_Mixed_NestedCase_Filter_SubFilter struct {
 
 func (x *Test_Mixed_NestedCase_Filter_SubFilter) Reset() {
 	*x = Test_Mixed_NestedCase_Filter_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[56]
+	mi := &file_test_messages_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2575,7 +2611,7 @@ func (x *Test_Mixed_NestedCase_Filter_SubFilter) String() string {
 func (*Test_Mixed_NestedCase_Filter_SubFilter) ProtoMessage() {}
 
 func (x *Test_Mixed_NestedCase_Filter_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[56]
+	mi := &file_test_messages_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2615,7 +2651,7 @@ type Test_Mixed_RepeatedMessageCase_Product struct {
 
 func (x *Test_Mixed_RepeatedMessageCase_Product) Reset() {
 	*x = Test_Mixed_RepeatedMessageCase_Product{}
-	mi := &file_test_messages_proto_msgTypes[57]
+	mi := &file_test_messages_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2627,7 +2663,7 @@ func (x *Test_Mixed_RepeatedMessageCase_Product) String() string {
 func (*Test_Mixed_RepeatedMessageCase_Product) ProtoMessage() {}
 
 func (x *Test_Mixed_RepeatedMessageCase_Product) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[57]
+	mi := &file_test_messages_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2667,7 +2703,7 @@ type Test_Mixed_MapCase_SubFilter struct {
 
 func (x *Test_Mixed_MapCase_SubFilter) Reset() {
 	*x = Test_Mixed_MapCase_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[60]
+	mi := &file_test_messages_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2679,7 +2715,7 @@ func (x *Test_Mixed_MapCase_SubFilter) String() string {
 func (*Test_Mixed_MapCase_SubFilter) ProtoMessage() {}
 
 func (x *Test_Mixed_MapCase_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[60]
+	mi := &file_test_messages_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2719,7 +2755,7 @@ type Test_Mixed_MultipleCase_SubFilter struct {
 
 func (x *Test_Mixed_MultipleCase_SubFilter) Reset() {
 	*x = Test_Mixed_MultipleCase_SubFilter{}
-	mi := &file_test_messages_proto_msgTypes[62]
+	mi := &file_test_messages_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2731,7 +2767,7 @@ func (x *Test_Mixed_MultipleCase_SubFilter) String() string {
 func (*Test_Mixed_MultipleCase_SubFilter) ProtoMessage() {}
 
 func (x *Test_Mixed_MultipleCase_SubFilter) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[62]
+	mi := &file_test_messages_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2774,7 +2810,7 @@ type Benchmark_Case5 struct {
 
 func (x *Benchmark_Case5) Reset() {
 	*x = Benchmark_Case5{}
-	mi := &file_test_messages_proto_msgTypes[63]
+	mi := &file_test_messages_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2786,7 +2822,7 @@ func (x *Benchmark_Case5) String() string {
 func (*Benchmark_Case5) ProtoMessage() {}
 
 func (x *Benchmark_Case5) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[63]
+	mi := &file_test_messages_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2855,7 +2891,7 @@ type Benchmark_Case10 struct {
 
 func (x *Benchmark_Case10) Reset() {
 	*x = Benchmark_Case10{}
-	mi := &file_test_messages_proto_msgTypes[64]
+	mi := &file_test_messages_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2867,7 +2903,7 @@ func (x *Benchmark_Case10) String() string {
 func (*Benchmark_Case10) ProtoMessage() {}
 
 func (x *Benchmark_Case10) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[64]
+	mi := &file_test_messages_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2991,7 +3027,7 @@ type Benchmark_Case30 struct {
 
 func (x *Benchmark_Case30) Reset() {
 	*x = Benchmark_Case30{}
-	mi := &file_test_messages_proto_msgTypes[65]
+	mi := &file_test_messages_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3003,7 +3039,7 @@ func (x *Benchmark_Case30) String() string {
 func (*Benchmark_Case30) ProtoMessage() {}
 
 func (x *Benchmark_Case30) ProtoReflect() protoreflect.Message {
-	mi := &file_test_messages_proto_msgTypes[65]
+	mi := &file_test_messages_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3225,6 +3261,222 @@ func (x *Benchmark_Case30) GetField29() string {
 func (x *Benchmark_Case30) GetField30() string {
 	if x != nil {
 		return x.Field30
+	}
+	return ""
+}
+
+type Test_Client_Call_Request struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=userId,json=user_id,proto3" json:"userId,omitempty"`
+	OrderId       int64                  `protobuf:"varint,2,opt,name=orderId,json=order_id,proto3" json:"orderId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Test_Client_Call_Request) Reset() {
+	*x = Test_Client_Call_Request{}
+	mi := &file_test_messages_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Test_Client_Call_Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Test_Client_Call_Request) ProtoMessage() {}
+
+func (x *Test_Client_Call_Request) ProtoReflect() protoreflect.Message {
+	mi := &file_test_messages_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Test_Client_Call_Request.ProtoReflect.Descriptor instead.
+func (*Test_Client_Call_Request) Descriptor() ([]byte, []int) {
+	return file_test_messages_proto_rawDescGZIP(), []int{6, 0}
+}
+
+func (x *Test_Client_Call_Request) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *Test_Client_Call_Request) GetOrderId() int64 {
+	if x != nil {
+		return x.OrderId
+	}
+	return 0
+}
+
+type Test_Client_Call_Response struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Test_Client_Call_Response) Reset() {
+	*x = Test_Client_Call_Response{}
+	mi := &file_test_messages_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Test_Client_Call_Response) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Test_Client_Call_Response) ProtoMessage() {}
+
+func (x *Test_Client_Call_Response) ProtoReflect() protoreflect.Message {
+	mi := &file_test_messages_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Test_Client_Call_Response.ProtoReflect.Descriptor instead.
+func (*Test_Client_Call_Response) Descriptor() ([]byte, []int) {
+	return file_test_messages_proto_rawDescGZIP(), []int{6, 1}
+}
+
+func (x *Test_Client_Call_Response) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Test_Client_Call_Response) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type Test_Client_Call_DefaultError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	Msg           string                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Test_Client_Call_DefaultError) Reset() {
+	*x = Test_Client_Call_DefaultError{}
+	mi := &file_test_messages_proto_msgTypes[69]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Test_Client_Call_DefaultError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Test_Client_Call_DefaultError) ProtoMessage() {}
+
+func (x *Test_Client_Call_DefaultError) ProtoReflect() protoreflect.Message {
+	mi := &file_test_messages_proto_msgTypes[69]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Test_Client_Call_DefaultError.ProtoReflect.Descriptor instead.
+func (*Test_Client_Call_DefaultError) Descriptor() ([]byte, []int) {
+	return file_test_messages_proto_rawDescGZIP(), []int{6, 2}
+}
+
+func (x *Test_Client_Call_DefaultError) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *Test_Client_Call_DefaultError) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+type Test_Client_Call_SpecialError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	Msg           string                 `protobuf:"bytes,2,opt,name=msg,proto3" json:"msg,omitempty"`
+	Warning       string                 `protobuf:"bytes,3,opt,name=warning,proto3" json:"warning,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Test_Client_Call_SpecialError) Reset() {
+	*x = Test_Client_Call_SpecialError{}
+	mi := &file_test_messages_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Test_Client_Call_SpecialError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Test_Client_Call_SpecialError) ProtoMessage() {}
+
+func (x *Test_Client_Call_SpecialError) ProtoReflect() protoreflect.Message {
+	mi := &file_test_messages_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Test_Client_Call_SpecialError.ProtoReflect.Descriptor instead.
+func (*Test_Client_Call_SpecialError) Descriptor() ([]byte, []int) {
+	return file_test_messages_proto_rawDescGZIP(), []int{6, 3}
+}
+
+func (x *Test_Client_Call_SpecialError) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *Test_Client_Call_SpecialError) GetMsg() string {
+	if x != nil {
+		return x.Msg
+	}
+	return ""
+}
+
+func (x *Test_Client_Call_SpecialError) GetWarning() string {
+	if x != nil {
+		return x.Warning
 	}
 	return ""
 }
@@ -3479,7 +3731,21 @@ const file_test_messages_proto_rawDesc = "" +
 	"\afield27\x18\x1b \x01(\tR\afield27\x12\x18\n" +
 	"\afield28\x18\x1c \x01(\tR\afield28\x12\x18\n" +
 	"\afield29\x18\x1d \x01(\tR\afield29\x12\x18\n" +
-	"\afield30\x18\x1e \x01(\tR\afield30B2Z0go.unistack.org/micro-client-http/v4/proto;protob\x06proto3"
+	"\afield30\x18\x1e \x01(\tR\afield30\"\x87\x02\n" +
+	"\x10Test_Client_Call\x1a=\n" +
+	"\aRequest\x12\x17\n" +
+	"\x06userId\x18\x01 \x01(\tR\auser_id\x12\x19\n" +
+	"\aorderId\x18\x02 \x01(\x03R\border_id\x1a.\n" +
+	"\bResponse\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x1a4\n" +
+	"\fDefaultError\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x10\n" +
+	"\x03msg\x18\x02 \x01(\tR\x03msg\x1aN\n" +
+	"\fSpecialError\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x10\n" +
+	"\x03msg\x18\x02 \x01(\tR\x03msg\x12\x18\n" +
+	"\awarning\x18\x03 \x01(\tR\awarningB2Z0go.unistack.org/micro-client-http/v4/proto;protob\x06proto3"
 
 var (
 	file_test_messages_proto_rawDescOnce sync.Once
@@ -3493,7 +3759,7 @@ func file_test_messages_proto_rawDescGZIP() []byte {
 	return file_test_messages_proto_rawDescData
 }
 
-var file_test_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 66)
+var file_test_messages_proto_msgTypes = make([]protoimpl.MessageInfo, 71)
 var file_test_messages_proto_goTypes = []any{
 	(*TestRequestBuilder)(nil),                         // 0: proto.TestRequestBuilder
 	(*Test_PathOnly)(nil),                              // 1: proto.Test_PathOnly
@@ -3501,108 +3767,113 @@ var file_test_messages_proto_goTypes = []any{
 	(*Test_BodyOnly)(nil),                              // 3: proto.Test_BodyOnly
 	(*Test_Mixed)(nil),                                 // 4: proto.Test_Mixed
 	(*Benchmark)(nil),                                  // 5: proto.Benchmark
-	(*Test_PathOnly_PrimitiveCase)(nil),                // 6: proto.Test_PathOnly.PrimitiveCase
-	(*Test_PathOnly_NestedCase)(nil),                   // 7: proto.Test_PathOnly.NestedCase
-	(*Test_PathOnly_MultipleCase)(nil),                 // 8: proto.Test_PathOnly.MultipleCase
-	(*Test_PathOnly_RepeatedCase)(nil),                 // 9: proto.Test_PathOnly.RepeatedCase
-	(*Test_PathOnly_NonPrimitiveMessageCase)(nil),      // 10: proto.Test_PathOnly.NonPrimitiveMessageCase
-	(*Test_PathOnly_NonPrimitiveMapCase)(nil),          // 11: proto.Test_PathOnly.NonPrimitiveMapCase
-	(*Test_PathOnly_PatternCase)(nil),                  // 12: proto.Test_PathOnly.PatternCase
-	(*Test_PathOnly_CompositePatternCase)(nil),         // 13: proto.Test_PathOnly.CompositePatternCase
-	(*Test_PathOnly_NestedCase_User)(nil),              // 14: proto.Test_PathOnly.NestedCase.User
-	(*Test_PathOnly_NestedCase_Order)(nil),             // 15: proto.Test_PathOnly.NestedCase.Order
-	(*Test_PathOnly_NestedCase_Order_Product)(nil),     // 16: proto.Test_PathOnly.NestedCase.Order.Product
-	(*Test_PathOnly_MultipleCase_Order)(nil),           // 17: proto.Test_PathOnly.MultipleCase.Order
-	(*Test_PathOnly_NonPrimitiveMessageCase_User)(nil), // 18: proto.Test_PathOnly.NonPrimitiveMessageCase.User
-	nil,                                                       // 19: proto.Test_PathOnly.NonPrimitiveMapCase.UserIdEntry
-	(*Test_QueryOnly_PrimitiveCase)(nil),                      // 20: proto.Test_QueryOnly.PrimitiveCase
-	(*Test_QueryOnly_RepeatedCase)(nil),                       // 21: proto.Test_QueryOnly.RepeatedCase
-	(*Test_QueryOnly_NestedMessageCase)(nil),                  // 22: proto.Test_QueryOnly.NestedMessageCase
-	(*Test_QueryOnly_NestedMapCase)(nil),                      // 23: proto.Test_QueryOnly.NestedMapCase
-	(*Test_QueryOnly_MultipleCase)(nil),                       // 24: proto.Test_QueryOnly.MultipleCase
-	(*Test_QueryOnly_RepeatedMessageCase)(nil),                // 25: proto.Test_QueryOnly.RepeatedMessageCase
-	(*Test_QueryOnly_NestedMessageCase_Filter)(nil),           // 26: proto.Test_QueryOnly.NestedMessageCase.Filter
-	(*Test_QueryOnly_NestedMessageCase_Filter_SubFilter)(nil), // 27: proto.Test_QueryOnly.NestedMessageCase.Filter.SubFilter
-	nil, // 28: proto.Test_QueryOnly.NestedMapCase.FirstFilterEntry
-	nil, // 29: proto.Test_QueryOnly.NestedMapCase.SecondFilterEntry
-	(*Test_QueryOnly_NestedMapCase_SubFilter)(nil), // 30: proto.Test_QueryOnly.NestedMapCase.SubFilter
-	nil, // 31: proto.Test_QueryOnly.MultipleCase.SecondFilterEntry
-	(*Test_QueryOnly_MultipleCase_Filter)(nil),        // 32: proto.Test_QueryOnly.MultipleCase.Filter
-	(*Test_QueryOnly_MultipleCase_SubFilter)(nil),     // 33: proto.Test_QueryOnly.MultipleCase.SubFilter
-	(*Test_QueryOnly_RepeatedMessageCase_Filter)(nil), // 34: proto.Test_QueryOnly.RepeatedMessageCase.Filter
-	(*Test_BodyOnly_PrimitiveCase)(nil),               // 35: proto.Test_BodyOnly.PrimitiveCase
-	(*Test_BodyOnly_NestedCase)(nil),                  // 36: proto.Test_BodyOnly.NestedCase
-	(*Test_BodyOnly_RepeatedMessageCase)(nil),         // 37: proto.Test_BodyOnly.RepeatedMessageCase
-	(*Test_BodyOnly_MapCase)(nil),                     // 38: proto.Test_BodyOnly.MapCase
-	(*Test_BodyOnly_MultipleCase)(nil),                // 39: proto.Test_BodyOnly.MultipleCase
-	(*Test_BodyOnly_PrimitiveCase_Product)(nil),       // 40: proto.Test_BodyOnly.PrimitiveCase.Product
-	(*Test_BodyOnly_NestedCase_Filter)(nil),           // 41: proto.Test_BodyOnly.NestedCase.Filter
-	(*Test_BodyOnly_NestedCase_Filter_SubFilter)(nil), // 42: proto.Test_BodyOnly.NestedCase.Filter.SubFilter
-	(*Test_BodyOnly_RepeatedMessageCase_Product)(nil), // 43: proto.Test_BodyOnly.RepeatedMessageCase.Product
-	nil,                                     // 44: proto.Test_BodyOnly.MapCase.FirstFilterEntry
-	nil,                                     // 45: proto.Test_BodyOnly.MapCase.SecondFilterEntry
-	(*Test_BodyOnly_MapCase_SubFilter)(nil), // 46: proto.Test_BodyOnly.MapCase.SubFilter
-	nil,                                     // 47: proto.Test_BodyOnly.MultipleCase.SecondFilterEntry
-	(*Test_BodyOnly_MultipleCase_SubFilter)(nil),   // 48: proto.Test_BodyOnly.MultipleCase.SubFilter
-	(*Test_Mixed_PrimitiveCase)(nil),               // 49: proto.Test_Mixed.PrimitiveCase
-	(*Test_Mixed_NestedCase)(nil),                  // 50: proto.Test_Mixed.NestedCase
-	(*Test_Mixed_RepeatedMessageCase)(nil),         // 51: proto.Test_Mixed.RepeatedMessageCase
-	(*Test_Mixed_MapCase)(nil),                     // 52: proto.Test_Mixed.MapCase
-	(*Test_Mixed_MultipleCase)(nil),                // 53: proto.Test_Mixed.MultipleCase
-	(*Test_Mixed_PrimitiveCase_Product)(nil),       // 54: proto.Test_Mixed.PrimitiveCase.Product
-	(*Test_Mixed_NestedCase_Filter)(nil),           // 55: proto.Test_Mixed.NestedCase.Filter
-	(*Test_Mixed_NestedCase_Filter_SubFilter)(nil), // 56: proto.Test_Mixed.NestedCase.Filter.SubFilter
-	(*Test_Mixed_RepeatedMessageCase_Product)(nil), // 57: proto.Test_Mixed.RepeatedMessageCase.Product
-	nil,                                  // 58: proto.Test_Mixed.MapCase.FirstFilterEntry
-	nil,                                  // 59: proto.Test_Mixed.MapCase.SecondFilterEntry
-	(*Test_Mixed_MapCase_SubFilter)(nil), // 60: proto.Test_Mixed.MapCase.SubFilter
-	nil,                                  // 61: proto.Test_Mixed.MultipleCase.SecondFilterEntry
-	(*Test_Mixed_MultipleCase_SubFilter)(nil), // 62: proto.Test_Mixed.MultipleCase.SubFilter
-	(*Benchmark_Case5)(nil),                   // 63: proto.Benchmark.Case5
-	(*Benchmark_Case10)(nil),                  // 64: proto.Benchmark.Case10
-	(*Benchmark_Case30)(nil),                  // 65: proto.Benchmark.Case30
+	(*Test_Client_Call)(nil),                           // 6: proto.Test_Client_Call
+	(*Test_PathOnly_PrimitiveCase)(nil),                // 7: proto.Test_PathOnly.PrimitiveCase
+	(*Test_PathOnly_NestedCase)(nil),                   // 8: proto.Test_PathOnly.NestedCase
+	(*Test_PathOnly_MultipleCase)(nil),                 // 9: proto.Test_PathOnly.MultipleCase
+	(*Test_PathOnly_RepeatedCase)(nil),                 // 10: proto.Test_PathOnly.RepeatedCase
+	(*Test_PathOnly_NonPrimitiveMessageCase)(nil),      // 11: proto.Test_PathOnly.NonPrimitiveMessageCase
+	(*Test_PathOnly_NonPrimitiveMapCase)(nil),          // 12: proto.Test_PathOnly.NonPrimitiveMapCase
+	(*Test_PathOnly_PatternCase)(nil),                  // 13: proto.Test_PathOnly.PatternCase
+	(*Test_PathOnly_CompositePatternCase)(nil),         // 14: proto.Test_PathOnly.CompositePatternCase
+	(*Test_PathOnly_NestedCase_User)(nil),              // 15: proto.Test_PathOnly.NestedCase.User
+	(*Test_PathOnly_NestedCase_Order)(nil),             // 16: proto.Test_PathOnly.NestedCase.Order
+	(*Test_PathOnly_NestedCase_Order_Product)(nil),     // 17: proto.Test_PathOnly.NestedCase.Order.Product
+	(*Test_PathOnly_MultipleCase_Order)(nil),           // 18: proto.Test_PathOnly.MultipleCase.Order
+	(*Test_PathOnly_NonPrimitiveMessageCase_User)(nil), // 19: proto.Test_PathOnly.NonPrimitiveMessageCase.User
+	nil,                                                       // 20: proto.Test_PathOnly.NonPrimitiveMapCase.UserIdEntry
+	(*Test_QueryOnly_PrimitiveCase)(nil),                      // 21: proto.Test_QueryOnly.PrimitiveCase
+	(*Test_QueryOnly_RepeatedCase)(nil),                       // 22: proto.Test_QueryOnly.RepeatedCase
+	(*Test_QueryOnly_NestedMessageCase)(nil),                  // 23: proto.Test_QueryOnly.NestedMessageCase
+	(*Test_QueryOnly_NestedMapCase)(nil),                      // 24: proto.Test_QueryOnly.NestedMapCase
+	(*Test_QueryOnly_MultipleCase)(nil),                       // 25: proto.Test_QueryOnly.MultipleCase
+	(*Test_QueryOnly_RepeatedMessageCase)(nil),                // 26: proto.Test_QueryOnly.RepeatedMessageCase
+	(*Test_QueryOnly_NestedMessageCase_Filter)(nil),           // 27: proto.Test_QueryOnly.NestedMessageCase.Filter
+	(*Test_QueryOnly_NestedMessageCase_Filter_SubFilter)(nil), // 28: proto.Test_QueryOnly.NestedMessageCase.Filter.SubFilter
+	nil, // 29: proto.Test_QueryOnly.NestedMapCase.FirstFilterEntry
+	nil, // 30: proto.Test_QueryOnly.NestedMapCase.SecondFilterEntry
+	(*Test_QueryOnly_NestedMapCase_SubFilter)(nil), // 31: proto.Test_QueryOnly.NestedMapCase.SubFilter
+	nil, // 32: proto.Test_QueryOnly.MultipleCase.SecondFilterEntry
+	(*Test_QueryOnly_MultipleCase_Filter)(nil),        // 33: proto.Test_QueryOnly.MultipleCase.Filter
+	(*Test_QueryOnly_MultipleCase_SubFilter)(nil),     // 34: proto.Test_QueryOnly.MultipleCase.SubFilter
+	(*Test_QueryOnly_RepeatedMessageCase_Filter)(nil), // 35: proto.Test_QueryOnly.RepeatedMessageCase.Filter
+	(*Test_BodyOnly_PrimitiveCase)(nil),               // 36: proto.Test_BodyOnly.PrimitiveCase
+	(*Test_BodyOnly_NestedCase)(nil),                  // 37: proto.Test_BodyOnly.NestedCase
+	(*Test_BodyOnly_RepeatedMessageCase)(nil),         // 38: proto.Test_BodyOnly.RepeatedMessageCase
+	(*Test_BodyOnly_MapCase)(nil),                     // 39: proto.Test_BodyOnly.MapCase
+	(*Test_BodyOnly_MultipleCase)(nil),                // 40: proto.Test_BodyOnly.MultipleCase
+	(*Test_BodyOnly_PrimitiveCase_Product)(nil),       // 41: proto.Test_BodyOnly.PrimitiveCase.Product
+	(*Test_BodyOnly_NestedCase_Filter)(nil),           // 42: proto.Test_BodyOnly.NestedCase.Filter
+	(*Test_BodyOnly_NestedCase_Filter_SubFilter)(nil), // 43: proto.Test_BodyOnly.NestedCase.Filter.SubFilter
+	(*Test_BodyOnly_RepeatedMessageCase_Product)(nil), // 44: proto.Test_BodyOnly.RepeatedMessageCase.Product
+	nil,                                     // 45: proto.Test_BodyOnly.MapCase.FirstFilterEntry
+	nil,                                     // 46: proto.Test_BodyOnly.MapCase.SecondFilterEntry
+	(*Test_BodyOnly_MapCase_SubFilter)(nil), // 47: proto.Test_BodyOnly.MapCase.SubFilter
+	nil,                                     // 48: proto.Test_BodyOnly.MultipleCase.SecondFilterEntry
+	(*Test_BodyOnly_MultipleCase_SubFilter)(nil),   // 49: proto.Test_BodyOnly.MultipleCase.SubFilter
+	(*Test_Mixed_PrimitiveCase)(nil),               // 50: proto.Test_Mixed.PrimitiveCase
+	(*Test_Mixed_NestedCase)(nil),                  // 51: proto.Test_Mixed.NestedCase
+	(*Test_Mixed_RepeatedMessageCase)(nil),         // 52: proto.Test_Mixed.RepeatedMessageCase
+	(*Test_Mixed_MapCase)(nil),                     // 53: proto.Test_Mixed.MapCase
+	(*Test_Mixed_MultipleCase)(nil),                // 54: proto.Test_Mixed.MultipleCase
+	(*Test_Mixed_PrimitiveCase_Product)(nil),       // 55: proto.Test_Mixed.PrimitiveCase.Product
+	(*Test_Mixed_NestedCase_Filter)(nil),           // 56: proto.Test_Mixed.NestedCase.Filter
+	(*Test_Mixed_NestedCase_Filter_SubFilter)(nil), // 57: proto.Test_Mixed.NestedCase.Filter.SubFilter
+	(*Test_Mixed_RepeatedMessageCase_Product)(nil), // 58: proto.Test_Mixed.RepeatedMessageCase.Product
+	nil,                                  // 59: proto.Test_Mixed.MapCase.FirstFilterEntry
+	nil,                                  // 60: proto.Test_Mixed.MapCase.SecondFilterEntry
+	(*Test_Mixed_MapCase_SubFilter)(nil), // 61: proto.Test_Mixed.MapCase.SubFilter
+	nil,                                  // 62: proto.Test_Mixed.MultipleCase.SecondFilterEntry
+	(*Test_Mixed_MultipleCase_SubFilter)(nil), // 63: proto.Test_Mixed.MultipleCase.SubFilter
+	(*Benchmark_Case5)(nil),                   // 64: proto.Benchmark.Case5
+	(*Benchmark_Case10)(nil),                  // 65: proto.Benchmark.Case10
+	(*Benchmark_Case30)(nil),                  // 66: proto.Benchmark.Case30
+	(*Test_Client_Call_Request)(nil),          // 67: proto.Test_Client_Call.Request
+	(*Test_Client_Call_Response)(nil),         // 68: proto.Test_Client_Call.Response
+	(*Test_Client_Call_DefaultError)(nil),     // 69: proto.Test_Client_Call.DefaultError
+	(*Test_Client_Call_SpecialError)(nil),     // 70: proto.Test_Client_Call.SpecialError
 }
 var file_test_messages_proto_depIdxs = []int32{
-	14, // 0: proto.Test_PathOnly.NestedCase.user:type_name -> proto.Test_PathOnly.NestedCase.User
-	15, // 1: proto.Test_PathOnly.NestedCase.order:type_name -> proto.Test_PathOnly.NestedCase.Order
-	17, // 2: proto.Test_PathOnly.MultipleCase.order:type_name -> proto.Test_PathOnly.MultipleCase.Order
-	18, // 3: proto.Test_PathOnly.NonPrimitiveMessageCase.userId:type_name -> proto.Test_PathOnly.NonPrimitiveMessageCase.User
-	19, // 4: proto.Test_PathOnly.NonPrimitiveMapCase.userId:type_name -> proto.Test_PathOnly.NonPrimitiveMapCase.UserIdEntry
-	16, // 5: proto.Test_PathOnly.NestedCase.Order.product:type_name -> proto.Test_PathOnly.NestedCase.Order.Product
-	26, // 6: proto.Test_QueryOnly.NestedMessageCase.filter:type_name -> proto.Test_QueryOnly.NestedMessageCase.Filter
-	28, // 7: proto.Test_QueryOnly.NestedMapCase.firstFilter:type_name -> proto.Test_QueryOnly.NestedMapCase.FirstFilterEntry
-	29, // 8: proto.Test_QueryOnly.NestedMapCase.secondFilter:type_name -> proto.Test_QueryOnly.NestedMapCase.SecondFilterEntry
-	32, // 9: proto.Test_QueryOnly.MultipleCase.firstFilter:type_name -> proto.Test_QueryOnly.MultipleCase.Filter
-	31, // 10: proto.Test_QueryOnly.MultipleCase.secondFilter:type_name -> proto.Test_QueryOnly.MultipleCase.SecondFilterEntry
-	34, // 11: proto.Test_QueryOnly.RepeatedMessageCase.filters:type_name -> proto.Test_QueryOnly.RepeatedMessageCase.Filter
-	27, // 12: proto.Test_QueryOnly.NestedMessageCase.Filter.subFilter:type_name -> proto.Test_QueryOnly.NestedMessageCase.Filter.SubFilter
-	30, // 13: proto.Test_QueryOnly.NestedMapCase.SecondFilterEntry.value:type_name -> proto.Test_QueryOnly.NestedMapCase.SubFilter
-	33, // 14: proto.Test_QueryOnly.MultipleCase.SecondFilterEntry.value:type_name -> proto.Test_QueryOnly.MultipleCase.SubFilter
-	33, // 15: proto.Test_QueryOnly.MultipleCase.Filter.subFilter:type_name -> proto.Test_QueryOnly.MultipleCase.SubFilter
-	40, // 16: proto.Test_BodyOnly.PrimitiveCase.product:type_name -> proto.Test_BodyOnly.PrimitiveCase.Product
-	41, // 17: proto.Test_BodyOnly.NestedCase.first_filter:type_name -> proto.Test_BodyOnly.NestedCase.Filter
-	41, // 18: proto.Test_BodyOnly.NestedCase.second_filter:type_name -> proto.Test_BodyOnly.NestedCase.Filter
-	43, // 19: proto.Test_BodyOnly.RepeatedMessageCase.products:type_name -> proto.Test_BodyOnly.RepeatedMessageCase.Product
-	44, // 20: proto.Test_BodyOnly.MapCase.firstFilter:type_name -> proto.Test_BodyOnly.MapCase.FirstFilterEntry
-	45, // 21: proto.Test_BodyOnly.MapCase.secondFilter:type_name -> proto.Test_BodyOnly.MapCase.SecondFilterEntry
-	48, // 22: proto.Test_BodyOnly.MultipleCase.firstFilter:type_name -> proto.Test_BodyOnly.MultipleCase.SubFilter
-	47, // 23: proto.Test_BodyOnly.MultipleCase.secondFilter:type_name -> proto.Test_BodyOnly.MultipleCase.SecondFilterEntry
-	48, // 24: proto.Test_BodyOnly.MultipleCase.thirdFilter:type_name -> proto.Test_BodyOnly.MultipleCase.SubFilter
-	42, // 25: proto.Test_BodyOnly.NestedCase.Filter.subFilter:type_name -> proto.Test_BodyOnly.NestedCase.Filter.SubFilter
-	46, // 26: proto.Test_BodyOnly.MapCase.SecondFilterEntry.value:type_name -> proto.Test_BodyOnly.MapCase.SubFilter
-	48, // 27: proto.Test_BodyOnly.MultipleCase.SecondFilterEntry.value:type_name -> proto.Test_BodyOnly.MultipleCase.SubFilter
-	54, // 28: proto.Test_Mixed.PrimitiveCase.product:type_name -> proto.Test_Mixed.PrimitiveCase.Product
-	55, // 29: proto.Test_Mixed.NestedCase.first_filter:type_name -> proto.Test_Mixed.NestedCase.Filter
-	55, // 30: proto.Test_Mixed.NestedCase.second_filter:type_name -> proto.Test_Mixed.NestedCase.Filter
-	57, // 31: proto.Test_Mixed.RepeatedMessageCase.products:type_name -> proto.Test_Mixed.RepeatedMessageCase.Product
-	58, // 32: proto.Test_Mixed.MapCase.firstFilter:type_name -> proto.Test_Mixed.MapCase.FirstFilterEntry
-	59, // 33: proto.Test_Mixed.MapCase.secondFilter:type_name -> proto.Test_Mixed.MapCase.SecondFilterEntry
-	62, // 34: proto.Test_Mixed.MultipleCase.firstFilter:type_name -> proto.Test_Mixed.MultipleCase.SubFilter
-	61, // 35: proto.Test_Mixed.MultipleCase.secondFilter:type_name -> proto.Test_Mixed.MultipleCase.SecondFilterEntry
-	62, // 36: proto.Test_Mixed.MultipleCase.thirdFilter:type_name -> proto.Test_Mixed.MultipleCase.SubFilter
-	56, // 37: proto.Test_Mixed.NestedCase.Filter.subFilter:type_name -> proto.Test_Mixed.NestedCase.Filter.SubFilter
-	60, // 38: proto.Test_Mixed.MapCase.SecondFilterEntry.value:type_name -> proto.Test_Mixed.MapCase.SubFilter
-	62, // 39: proto.Test_Mixed.MultipleCase.SecondFilterEntry.value:type_name -> proto.Test_Mixed.MultipleCase.SubFilter
+	15, // 0: proto.Test_PathOnly.NestedCase.user:type_name -> proto.Test_PathOnly.NestedCase.User
+	16, // 1: proto.Test_PathOnly.NestedCase.order:type_name -> proto.Test_PathOnly.NestedCase.Order
+	18, // 2: proto.Test_PathOnly.MultipleCase.order:type_name -> proto.Test_PathOnly.MultipleCase.Order
+	19, // 3: proto.Test_PathOnly.NonPrimitiveMessageCase.userId:type_name -> proto.Test_PathOnly.NonPrimitiveMessageCase.User
+	20, // 4: proto.Test_PathOnly.NonPrimitiveMapCase.userId:type_name -> proto.Test_PathOnly.NonPrimitiveMapCase.UserIdEntry
+	17, // 5: proto.Test_PathOnly.NestedCase.Order.product:type_name -> proto.Test_PathOnly.NestedCase.Order.Product
+	27, // 6: proto.Test_QueryOnly.NestedMessageCase.filter:type_name -> proto.Test_QueryOnly.NestedMessageCase.Filter
+	29, // 7: proto.Test_QueryOnly.NestedMapCase.firstFilter:type_name -> proto.Test_QueryOnly.NestedMapCase.FirstFilterEntry
+	30, // 8: proto.Test_QueryOnly.NestedMapCase.secondFilter:type_name -> proto.Test_QueryOnly.NestedMapCase.SecondFilterEntry
+	33, // 9: proto.Test_QueryOnly.MultipleCase.firstFilter:type_name -> proto.Test_QueryOnly.MultipleCase.Filter
+	32, // 10: proto.Test_QueryOnly.MultipleCase.secondFilter:type_name -> proto.Test_QueryOnly.MultipleCase.SecondFilterEntry
+	35, // 11: proto.Test_QueryOnly.RepeatedMessageCase.filters:type_name -> proto.Test_QueryOnly.RepeatedMessageCase.Filter
+	28, // 12: proto.Test_QueryOnly.NestedMessageCase.Filter.subFilter:type_name -> proto.Test_QueryOnly.NestedMessageCase.Filter.SubFilter
+	31, // 13: proto.Test_QueryOnly.NestedMapCase.SecondFilterEntry.value:type_name -> proto.Test_QueryOnly.NestedMapCase.SubFilter
+	34, // 14: proto.Test_QueryOnly.MultipleCase.SecondFilterEntry.value:type_name -> proto.Test_QueryOnly.MultipleCase.SubFilter
+	34, // 15: proto.Test_QueryOnly.MultipleCase.Filter.subFilter:type_name -> proto.Test_QueryOnly.MultipleCase.SubFilter
+	41, // 16: proto.Test_BodyOnly.PrimitiveCase.product:type_name -> proto.Test_BodyOnly.PrimitiveCase.Product
+	42, // 17: proto.Test_BodyOnly.NestedCase.first_filter:type_name -> proto.Test_BodyOnly.NestedCase.Filter
+	42, // 18: proto.Test_BodyOnly.NestedCase.second_filter:type_name -> proto.Test_BodyOnly.NestedCase.Filter
+	44, // 19: proto.Test_BodyOnly.RepeatedMessageCase.products:type_name -> proto.Test_BodyOnly.RepeatedMessageCase.Product
+	45, // 20: proto.Test_BodyOnly.MapCase.firstFilter:type_name -> proto.Test_BodyOnly.MapCase.FirstFilterEntry
+	46, // 21: proto.Test_BodyOnly.MapCase.secondFilter:type_name -> proto.Test_BodyOnly.MapCase.SecondFilterEntry
+	49, // 22: proto.Test_BodyOnly.MultipleCase.firstFilter:type_name -> proto.Test_BodyOnly.MultipleCase.SubFilter
+	48, // 23: proto.Test_BodyOnly.MultipleCase.secondFilter:type_name -> proto.Test_BodyOnly.MultipleCase.SecondFilterEntry
+	49, // 24: proto.Test_BodyOnly.MultipleCase.thirdFilter:type_name -> proto.Test_BodyOnly.MultipleCase.SubFilter
+	43, // 25: proto.Test_BodyOnly.NestedCase.Filter.subFilter:type_name -> proto.Test_BodyOnly.NestedCase.Filter.SubFilter
+	47, // 26: proto.Test_BodyOnly.MapCase.SecondFilterEntry.value:type_name -> proto.Test_BodyOnly.MapCase.SubFilter
+	49, // 27: proto.Test_BodyOnly.MultipleCase.SecondFilterEntry.value:type_name -> proto.Test_BodyOnly.MultipleCase.SubFilter
+	55, // 28: proto.Test_Mixed.PrimitiveCase.product:type_name -> proto.Test_Mixed.PrimitiveCase.Product
+	56, // 29: proto.Test_Mixed.NestedCase.first_filter:type_name -> proto.Test_Mixed.NestedCase.Filter
+	56, // 30: proto.Test_Mixed.NestedCase.second_filter:type_name -> proto.Test_Mixed.NestedCase.Filter
+	58, // 31: proto.Test_Mixed.RepeatedMessageCase.products:type_name -> proto.Test_Mixed.RepeatedMessageCase.Product
+	59, // 32: proto.Test_Mixed.MapCase.firstFilter:type_name -> proto.Test_Mixed.MapCase.FirstFilterEntry
+	60, // 33: proto.Test_Mixed.MapCase.secondFilter:type_name -> proto.Test_Mixed.MapCase.SecondFilterEntry
+	63, // 34: proto.Test_Mixed.MultipleCase.firstFilter:type_name -> proto.Test_Mixed.MultipleCase.SubFilter
+	62, // 35: proto.Test_Mixed.MultipleCase.secondFilter:type_name -> proto.Test_Mixed.MultipleCase.SecondFilterEntry
+	63, // 36: proto.Test_Mixed.MultipleCase.thirdFilter:type_name -> proto.Test_Mixed.MultipleCase.SubFilter
+	57, // 37: proto.Test_Mixed.NestedCase.Filter.subFilter:type_name -> proto.Test_Mixed.NestedCase.Filter.SubFilter
+	61, // 38: proto.Test_Mixed.MapCase.SecondFilterEntry.value:type_name -> proto.Test_Mixed.MapCase.SubFilter
+	63, // 39: proto.Test_Mixed.MultipleCase.SecondFilterEntry.value:type_name -> proto.Test_Mixed.MultipleCase.SubFilter
 	40, // [40:40] is the sub-list for method output_type
 	40, // [40:40] is the sub-list for method input_type
 	40, // [40:40] is the sub-list for extension type_name
@@ -3621,7 +3892,7 @@ func file_test_messages_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_test_messages_proto_rawDesc), len(file_test_messages_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   66,
+			NumMessages:   71,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

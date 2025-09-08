@@ -308,3 +308,23 @@ message Benchmark {
     string field30 = 30;
   }
 }
+
+message Test_Client_Call {
+  message Request {
+    string userId = 1 [json_name = "user_id"];
+    int64  orderId = 2 [json_name = "order_id"];
+  }
+  message Response {
+    string id = 1;
+    string name = 2;
+  }
+  message DefaultError {
+    string code = 1;
+    string msg = 2;
+  }
+  message SpecialError {
+    string code = 1;
+    string msg = 2;
+    string warning = 3;
+  }
+}
