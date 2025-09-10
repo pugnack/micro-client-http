@@ -3,6 +3,7 @@ package http
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,7 +13,6 @@ import (
 
 	"go.unistack.org/micro/v4/client"
 	"go.unistack.org/micro/v4/codec"
-	"go.unistack.org/micro/v4/errors"
 	"go.unistack.org/micro/v4/logger"
 	"go.unistack.org/micro/v4/metadata"
 	"google.golang.org/protobuf/proto"
@@ -35,7 +35,7 @@ func buildHTTPRequest(
 ) {
 	protoMsg, ok := msg.(proto.Message)
 	if !ok {
-		return nil, errors.BadRequest("go.micro.client", "msg must be a proto message type")
+		return nil, errors.New("msg must be a proto message type")
 	}
 
 	var (
@@ -79,22 +79,22 @@ func buildHTTPRequest(
 
 	reqBuilder, err := builder.NewRequestBuilder(path, method, bodyOpt, protoMsg)
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "new request builder: %+v", err)
+		return nil, fmt.Errorf("new request builder: %w", err)
 	}
 
 	resolvedPath, newMsg, err := reqBuilder.Build()
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "request build: %+v", err)
+		return nil, fmt.Errorf("build request: %w", err)
 	}
 
 	u, err := normalizeURL(fmt.Sprintf("%s%s", addr, resolvedPath))
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "normalize url: %+v", err)
+		return nil, fmt.Errorf("normalize url: %w", err)
 	}
 
 	reqBody, err := cf.Marshal(newMsg)
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "marshal msg: %+v", err)
+		return nil, fmt.Errorf("marshal msg: %w", err)
 	}
 
 	var hreq *http.Request
@@ -107,12 +107,12 @@ func buildHTTPRequest(
 	}
 
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "new http request: %+v", err)
+		return nil, fmt.Errorf("new http request: %w", err)
 	}
 
 	setHeadersAndCookies(ctx, hreq, ct, opts)
 	if err = validateHeadersAndCookies(hreq, parameters); err != nil {
-		return nil, errors.BadRequest("go.micro.client", "validate headers and cookies: %+v", err)
+		return nil, fmt.Errorf("validate headers and cookies: %w", err)
 	}
 
 	if log.V(logger.DebugLevel) {
@@ -140,7 +140,7 @@ func normalizeURL(raw string) (*url.URL, error) {
 	}
 
 	if u.Host == "" {
-		return nil, fmt.Errorf("missing host in url")
+		return nil, errors.New("missing host in url")
 	}
 
 	return u, nil
