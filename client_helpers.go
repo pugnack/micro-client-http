@@ -16,6 +16,7 @@ import (
 	"go.unistack.org/micro/v4/logger"
 	"go.unistack.org/micro/v4/metadata"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"go.unistack.org/micro-client-http/v4/builder"
 )
@@ -92,16 +93,16 @@ func buildHTTPRequest(
 		return nil, fmt.Errorf("normalize url: %w", err)
 	}
 
-	reqBody, err := cf.Marshal(newMsg)
+	body, err := marshallMsg(cf, newMsg)
 	if err != nil {
 		return nil, fmt.Errorf("marshal msg: %w", err)
 	}
 
 	var hreq *http.Request
 
-	if len(reqBody) > 0 {
-		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), io.NopCloser(bytes.NewBuffer(reqBody)))
-		hreq.ContentLength = int64(len(reqBody))
+	if len(body) > 0 {
+		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), io.NopCloser(bytes.NewBuffer(body)))
+		hreq.ContentLength = int64(len(body))
 	} else {
 		hreq, err = http.NewRequestWithContext(ctx, method, u.String(), nil)
 	}
@@ -118,7 +119,7 @@ func buildHTTPRequest(
 	if log.V(logger.DebugLevel) {
 		log.Debug(
 			ctx,
-			fmt.Sprintf("request %s to %s with headers %v body %s", method, u.String(), hreq.Header, reqBody),
+			fmt.Sprintf("request %s to %s with headers %v body %s", method, u.String(), hreq.Header, body),
 		)
 	}
 
@@ -144,6 +145,21 @@ func normalizeURL(raw string) (*url.URL, error) {
 	}
 
 	return u, nil
+}
+
+func marshallMsg(cf codec.Codec, msg proto.Message) ([]byte, error) {
+	if msg == nil {
+		return nil, nil
+	}
+	isEmpty := true
+	msg.ProtoReflect().Range(func(protoreflect.FieldDescriptor, protoreflect.Value) bool {
+		isEmpty = false
+		return false
+	})
+	if isEmpty {
+		return nil, nil
+	}
+	return cf.Marshal(msg)
 }
 
 func setHeadersAndCookies(ctx context.Context, r *http.Request, ct string, opts client.CallOptions) {

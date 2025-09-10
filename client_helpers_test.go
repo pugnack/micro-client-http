@@ -6,6 +6,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	jsoncodec "go.unistack.org/micro-codec-json/v4"
+	"google.golang.org/protobuf/proto"
+
+	pb "go.unistack.org/micro-client-http/v4/builder/proto"
 )
 
 func TestNormalizeURL(t *testing.T) {
@@ -129,6 +133,40 @@ func TestNormalizeURL(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, tt.want, result.String())
 			}
+		})
+	}
+}
+
+func TestMarshallMsg(t *testing.T) {
+	type request = pb.Test_Client_Call_Request
+
+	tests := []struct {
+		name     string
+		msg      proto.Message
+		expected string
+	}{
+		{
+			name:     "empty",
+			msg:      &request{},
+			expected: "",
+		},
+		{
+			name:     "nil",
+			msg:      nil,
+			expected: "",
+		},
+		{
+			name:     "valid",
+			msg:      &request{UserId: "123", OrderId: 456},
+			expected: `{"userId":"123","orderId":456}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := marshallMsg(jsoncodec.NewCodec(), tt.msg)
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, string(result))
 		})
 	}
 }
