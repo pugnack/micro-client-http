@@ -226,7 +226,7 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp any, opt
 		var err error
 		buf, err = io.ReadAll(hrsp.Body)
 		if err != nil {
-			return errors.InternalServerError("go.micro.client", "failed to read body: %v", err)
+			return errors.InternalServerError("go.micro.client", "read body: %v", err)
 		}
 	}
 
@@ -241,7 +241,7 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp any, opt
 
 	if hrsp.StatusCode < http.StatusBadRequest {
 		if err = cf.Unmarshal(buf, rsp); err != nil {
-			return errors.InternalServerError("go.micro.client", "failed to unmarshal response: %v", err)
+			return errors.InternalServerError("go.micro.client", "unmarshal response: %v", err)
 		}
 		return nil
 	}
@@ -261,7 +261,7 @@ func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp any, opt
 	}
 
 	if err = cf.Unmarshal(buf, mappedErr); err != nil {
-		return errors.InternalServerError("go.micro.client", "failed to unmarshal error: %v", err)
+		return errors.InternalServerError("go.micro.client", "unmarshal response: %v", err)
 	}
 
 	if v, ok := mappedErr.(error); ok {
