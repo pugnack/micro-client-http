@@ -3,8 +3,10 @@ package http_test
 import (
 	"context"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"net/http/httputil"
 	"testing"
 	"time"
 
@@ -17,6 +19,13 @@ import (
 	httpcli "go.unistack.org/micro-client-http/v4"
 	pb "go.unistack.org/micro-client-http/v4/builder/proto"
 )
+
+func printHTTPRequest(t *testing.T, r *http.Request) {
+	t.Helper()
+	output, err := httputil.DumpRequest(r, true)
+	require.NoError(t, err)
+	log.Printf("\n%s\n", output)
+}
 
 func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 	type (
@@ -36,7 +45,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 			name: "success",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -78,7 +87,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 			name: "default error",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -120,7 +129,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 			name: "special error",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -231,7 +240,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			name: "with required headers",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -277,7 +286,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			name: "without required headers",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -323,7 +332,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			name: "with required cookies",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -368,7 +377,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			name: "without required cookies",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
@@ -413,7 +422,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			name: "with headers and cookies",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(r)
+					printHTTPRequest(t, r)
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
