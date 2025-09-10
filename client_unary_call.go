@@ -101,7 +101,7 @@ func (c *Client) fnCall(ctx context.Context, req client.Request, rsp any, opts .
 
 		// record the result of the call to inform future routing decisions
 		if verr := c.opts.Selector.Record(node, err); verr != nil {
-			return verr
+			return errors.InternalServerError("go.micro.client", "%+v", verr)
 		}
 
 		// try and transform the error to a go-micro error
