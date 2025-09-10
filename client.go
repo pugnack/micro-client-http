@@ -454,7 +454,6 @@ func (c *Client) stream(ctx context.Context, addr string, req client.Request, op
 		ct = opts.ContentType
 	}
 
-	// get codec
 	cf, err := c.newCodec(ct)
 	if err != nil {
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
