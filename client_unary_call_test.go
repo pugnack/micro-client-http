@@ -525,6 +525,81 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 	}
 }
 
+func TestClient_Call_SuccessNoContent(t *testing.T) {
+	type (
+		request  = pb.Test_Client_Call_Request
+		response = pb.Test_Client_Call_Response
+	)
+
+	serverMock := func() *httptest.Server {
+		return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			printHTTPRequest(t, r)
+
+			// Validate request
+			require.Equal(t, "POST", r.Method)
+			require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
+
+			require.Equal(t, "application/json", r.Header.Get("Content-Type"))
+			require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
+			require.Equal(t, "My-Header-Value", r.Header.Get("My-Header"))
+
+			buf, err := io.ReadAll(r.Body)
+			require.NoError(t, err)
+			defer r.Body.Close()
+
+			c := jsoncodec.NewCodec()
+
+			req := &request{}
+			err = c.Unmarshal(buf, req)
+			require.NoError(t, err)
+			require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+
+			// Return response
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("My-Header", "My-Header-Value")
+			w.WriteHeader(http.StatusNoContent)
+		}))
+	}
+
+	server := serverMock()
+	defer server.Close()
+
+	httpClient := httpcli.NewClient(
+		client.Codec("application/json", jsoncodec.NewCodec()),
+	)
+
+	var (
+		ctx = metadata.NewOutgoingContext(
+			context.Background(),
+			metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value"),
+		)
+		req = &request{UserId: "user-id-1", OrderId: 123}
+		rsp = &response{}
+
+		respMetadata = metadata.Metadata{}
+	)
+
+	opts := []client.CallOption{
+		client.WithAddress(server.URL),
+		client.WithResponseMetadata(&respMetadata),
+		httpcli.Method(http.MethodPost),
+		httpcli.Path("/user/products"),
+		httpcli.Body("*"),
+	}
+
+	err := httpClient.Call(
+		ctx,
+		httpClient.NewRequest("test.service", "/test/call", req),
+		rsp,
+		opts...,
+	)
+	require.NoError(t, err)
+	require.Empty(t, rsp)
+
+	require.Equal(t, "application/json", respMetadata.GetJoined("Content-Type"))
+	require.Equal(t, "My-Header-Value", respMetadata.GetJoined("My-Header"))
+}
+
 func TestClient_Call_RequestTimeoutError(t *testing.T) {
 	type (
 		request  = pb.Test_Client_Call_Request
