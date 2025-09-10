@@ -190,10 +190,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 				respMetadata = metadata.Metadata{}
 			)
 
-			err := httpClient.Call(
-				ctx,
-				httpClient.NewRequest("test.service", "/test/call", req),
-				rsp,
+			opts := []client.CallOption{
 				client.WithAddress(server.URL),
 				client.WithResponseMetadata(&respMetadata),
 				httpcli.Method(http.MethodPost),
@@ -203,6 +200,13 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 					"default": &defaultError{},
 					"403":     &specialError{},
 				}),
+			}
+
+			err := httpClient.Call(
+				ctx,
+				httpClient.NewRequest("test.service", "/test/call", req),
+				rsp,
+				opts...,
 			)
 
 			if tt.expectedErr != nil {
@@ -546,15 +550,19 @@ func TestClient_Call_RequestTimeoutError(t *testing.T) {
 		rsp = &response{}
 	)
 
-	err := httpClient.Call(
-		ctx,
-		httpClient.NewRequest("test.service", "/test/call", req),
-		rsp,
+	opts := []client.CallOption{
 		client.WithAddress(server.URL),
 		client.WithRequestTimeout(time.Millisecond),
 		httpcli.Method(http.MethodPost),
 		httpcli.Path("/user/products"),
 		httpcli.Body("*"),
+	}
+
+	err := httpClient.Call(
+		ctx,
+		httpClient.NewRequest("test.service", "/test/call", req),
+		rsp,
+		opts...,
 	)
 	require.Error(t, err)
 }
@@ -585,14 +593,18 @@ func TestClient_Call_ContextDeadlineError(t *testing.T) {
 	)
 	defer cancel()
 
-	err := httpClient.Call(
-		ctx,
-		httpClient.NewRequest("test.service", "/test/call", req),
-		rsp,
+	opts := []client.CallOption{
 		client.WithAddress(server.URL),
 		httpcli.Method(http.MethodPost),
 		httpcli.Path("/user/products"),
 		httpcli.Body("*"),
+	}
+
+	err := httpClient.Call(
+		ctx,
+		httpClient.NewRequest("test.service", "/test/call", req),
+		rsp,
+		opts...,
 	)
 	require.Error(t, err)
 }
