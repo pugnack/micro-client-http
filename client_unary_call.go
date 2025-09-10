@@ -90,7 +90,7 @@ func (c *Client) fnCall(ctx context.Context, req client.Request, rsp any, opts .
 			// balance the list of nodes
 			next, err = callOpts.Selector.Select(routes)
 			if err != nil {
-				return err
+				return errors.InternalServerError("go.micro.client", "%+v", err)
 			}
 		}
 
