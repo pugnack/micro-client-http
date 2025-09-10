@@ -42,8 +42,7 @@ func defaultHTTPClient(
 	return &http.Client{Transport: tr}
 }
 
-// --------------------------------------------- HTTPClient option -----------------------------------------------------
-// HTTPDialer option
+// --------------------------------------------- HTTPDialer option -----------------------------------------------------
 type httpDialerKey struct{}
 
 func HTTPDialer(d *net.Dialer) client.Option {
