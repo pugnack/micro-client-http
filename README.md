@@ -16,8 +16,6 @@ implements HTTP rules defined in the [google/api/http.proto](https://github.com/
 
 ## Usage
 
-### Use directly
-
 ```go
 import (
     "go.unistack.org/micro/v4"
