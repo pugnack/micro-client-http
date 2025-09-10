@@ -176,8 +176,6 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 			defer server.Close()
 
 			httpClient := httpcli.NewClient(
-				client.Name("http"),
-				client.ContentType("application/json"),
 				client.Codec("application/json", jsoncodec.NewCodec()),
 			)
 
@@ -478,8 +476,6 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			defer server.Close()
 
 			httpClient := httpcli.NewClient(
-				client.Name("http"),
-				client.ContentType("application/json"),
 				client.Codec("application/json", jsoncodec.NewCodec()),
 			)
 
@@ -541,8 +537,6 @@ func TestClient_Call_RequestTimeoutError(t *testing.T) {
 	defer server.Close()
 
 	httpClient := httpcli.NewClient(
-		client.Name("http"),
-		client.ContentType("application/json"),
 		client.Codec("application/json", jsoncodec.NewCodec()),
 	)
 
@@ -581,8 +575,6 @@ func TestClient_Call_ContextDeadlineError(t *testing.T) {
 	defer server.Close()
 
 	httpClient := httpcli.NewClient(
-		client.Name("http"),
-		client.ContentType("application/json"),
 		client.Codec("application/json", jsoncodec.NewCodec()),
 	)
 
