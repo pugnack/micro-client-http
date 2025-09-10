@@ -86,7 +86,7 @@ func buildHTTPRequest(
 		return nil, errors.BadRequest("go.micro.client", "request build: %+v", err)
 	}
 
-	u, err := url.Parse(fmt.Sprintf("%s%s", addr, resolvedPath))
+	u, err := normalizeURL(fmt.Sprintf("%s%s", addr, resolvedPath))
 	if err != nil {
 		return nil, errors.BadRequest("go.micro.client", "%+v", err)
 	}
@@ -122,6 +122,27 @@ func buildHTTPRequest(
 	}
 
 	return hreq, nil
+}
+
+func normalizeURL(raw string) (*url.URL, error) {
+	if !strings.Contains(raw, "://") {
+		raw = "http://" + raw
+	}
+
+	u, err := url.Parse(raw)
+	if err != nil {
+		return nil, fmt.Errorf("invalid url: %w", err)
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return nil, fmt.Errorf("invalid scheme: %q (must be http or https)", u.Scheme)
+	}
+
+	if u.Host == "" {
+		return nil, fmt.Errorf("missing host in url")
+	}
+
+	return u, nil
 }
 
 func setHeadersAndCookies(ctx context.Context, r *http.Request, ct string, opts client.CallOptions) {
