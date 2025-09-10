@@ -128,50 +128,6 @@ func (c *Client) Call(ctx context.Context, req client.Request, rsp any, opts ...
 	return err
 }
 
-func (c *Client) Stream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
-	ts := time.Now()
-	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
-	var sp tracer.Span
-	ctx, sp = c.opts.Tracer.Start(ctx, req.Endpoint()+" rpc-client",
-		tracer.WithSpanKind(tracer.SpanKindClient),
-		tracer.WithSpanLabels("endpoint", req.Endpoint()),
-	)
-	stream, err := c.funcStream(ctx, req, opts...)
-	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Dec()
-	te := time.Since(ts)
-	c.opts.Meter.Summary(semconv.ClientRequestLatencyMicroseconds, "endpoint", req.Endpoint()).Update(te.Seconds())
-	c.opts.Meter.Histogram(semconv.ClientRequestDurationSeconds, "endpoint", req.Endpoint()).Update(te.Seconds())
-
-	if me := errors.FromError(err); me == nil {
-		sp.Finish()
-		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "success", "code", strconv.Itoa(int(200))).Inc()
-	} else {
-		sp.SetStatus(tracer.SpanStatusError, err.Error())
-		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "failure", "code", strconv.Itoa(int(me.Code))).Inc()
-	}
-
-	return stream, err
-}
-
-func (c *Client) String() string {
-	return "http"
-}
-
-func (c *Client) newCodec(ct string) (codec.Codec, error) {
-	c.mu.RLock()
-	defer c.mu.RUnlock()
-
-	if idx := strings.IndexRune(ct, ';'); idx >= 0 {
-		ct = ct[:idx]
-	}
-
-	if cf, ok := c.opts.Codecs[ct]; ok {
-		return cf, nil
-	}
-
-	return nil, codec.ErrUnknownContentType
-}
-
 func (c *Client) fnCall(ctx context.Context, req client.Request, rsp any, opts ...client.CallOption) error {
 	// make a copy of call opts
 	callOpts := c.opts.CallOptions
@@ -335,6 +291,31 @@ func (c *Client) call(ctx context.Context, addr string, req client.Request, rsp 
 	return c.parseRsp(ctx, hrsp, rsp, opts)
 }
 
+func (c *Client) Stream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
+	ts := time.Now()
+	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Inc()
+	var sp tracer.Span
+	ctx, sp = c.opts.Tracer.Start(ctx, req.Endpoint()+" rpc-client",
+		tracer.WithSpanKind(tracer.SpanKindClient),
+		tracer.WithSpanLabels("endpoint", req.Endpoint()),
+	)
+	stream, err := c.funcStream(ctx, req, opts...)
+	c.opts.Meter.Counter(semconv.ClientRequestInflight, "endpoint", req.Endpoint()).Dec()
+	te := time.Since(ts)
+	c.opts.Meter.Summary(semconv.ClientRequestLatencyMicroseconds, "endpoint", req.Endpoint()).Update(te.Seconds())
+	c.opts.Meter.Histogram(semconv.ClientRequestDurationSeconds, "endpoint", req.Endpoint()).Update(te.Seconds())
+
+	if me := errors.FromError(err); me == nil {
+		sp.Finish()
+		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "success", "code", strconv.Itoa(int(200))).Inc()
+	} else {
+		sp.SetStatus(tracer.SpanStatusError, err.Error())
+		c.opts.Meter.Counter(semconv.ClientRequestTotal, "endpoint", req.Endpoint(), "status", "failure", "code", strconv.Itoa(int(me.Code))).Inc()
+	}
+
+	return stream, err
+}
+
 func (c *Client) fnStream(ctx context.Context, req client.Request, opts ...client.CallOption) (client.Stream, error) {
 	var err error
 
@@ -496,6 +477,25 @@ func (c *Client) stream(ctx context.Context, addr string, req client.Request, op
 		reader:  bufio.NewReader(cc),
 		request: req,
 	}, nil
+}
+
+func (c *Client) String() string {
+	return "http"
+}
+
+func (c *Client) newCodec(ct string) (codec.Codec, error) {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	if idx := strings.IndexRune(ct, ';'); idx >= 0 {
+		ct = ct[:idx]
+	}
+
+	if cf, ok := c.opts.Codecs[ct]; ok {
+		return cf, nil
+	}
+
+	return nil, codec.ErrUnknownContentType
 }
 
 func (c *Client) parseRsp(ctx context.Context, hrsp *http.Response, rsp any, opts client.CallOptions) error {
