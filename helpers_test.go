@@ -133,6 +133,75 @@ func TestNormalizeURL(t *testing.T) {
 	}
 }
 
+func TestApplyCookies(t *testing.T) {
+	tests := []struct {
+		name       string
+		rawCookies []string
+		want       []*http.Cookie
+	}{
+		{
+			name:       "empty",
+			rawCookies: []string{},
+			want:       []*http.Cookie{},
+		},
+		{
+			name:       "single cookie",
+			rawCookies: []string{"session=abc123"},
+			want: []*http.Cookie{
+				{Name: "session", Value: "abc123"},
+			},
+		},
+		{
+			name:       "multiple cookies separate items",
+			rawCookies: []string{"session=abc123", "user=john"},
+			want: []*http.Cookie{
+				{Name: "session", Value: "abc123"},
+				{Name: "user", Value: "john"},
+			},
+		},
+		{
+			name:       "multiple cookies in one item",
+			rawCookies: []string{"a=1; b=2"},
+			want: []*http.Cookie{
+				{Name: "a", Value: "1"},
+				{Name: "b", Value: "2"},
+			},
+		},
+		{
+			name:       "mix of combined and separate cookies",
+			rawCookies: []string{"a=1; b=2", "c=3"},
+			want: []*http.Cookie{
+				{Name: "a", Value: "1"},
+				{Name: "b", Value: "2"},
+				{Name: "c", Value: "3"},
+			},
+		},
+		{
+			name:       "duplicate cookies",
+			rawCookies: []string{"session=abc123", "session=xyz"},
+			want: []*http.Cookie{
+				{Name: "session", Value: "abc123"},
+				{Name: "session", Value: "xyz"},
+			},
+		},
+		{
+			name:       "cookie with spaces",
+			rawCookies: []string{"token=abc 123"},
+			want: []*http.Cookie{
+				{Name: "token", Value: "abc 123", Quoted: true},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", "/", nil)
+			applyCookies(req, tt.rawCookies)
+			require.Equal(t, tt.want, req.Cookies())
+		})
+	}
+}
+
 func TestValidateHeadersAndCookies(t *testing.T) {
 	tests := []struct {
 		name           string
