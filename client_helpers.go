@@ -41,7 +41,7 @@ func buildHTTPRequest(
 
 	var (
 		method  = http.MethodPost
-		bodyOpt = ""
+		bodyOpt string
 
 		parameters = map[string]map[string]string{}
 	)
