@@ -104,7 +104,7 @@ func (c *Client) fnCall(ctx context.Context, req client.Request, rsp any, opts .
 			return errors.InternalServerError("go.micro.client", "%+v", verr)
 		}
 
-		// try and transform the error to a go-micro error
+		// try and transform the error to micro error
 		if verr, ok := err.(*errors.Error); ok {
 			return verr
 		}
