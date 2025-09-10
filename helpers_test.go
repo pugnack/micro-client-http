@@ -1,6 +1,8 @@
 package http
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -126,6 +128,108 @@ func TestNormalizeURL(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 				require.Equal(t, tt.want, result.String())
+			}
+		})
+	}
+}
+
+func TestValidateHeadersAndCookies(t *testing.T) {
+	tests := []struct {
+		name           string
+		prepareRequest func() *http.Request
+		parameters     map[string]map[string]string
+		wantErr        bool
+	}{
+		{
+			name: "all required headers and cookies present",
+			prepareRequest: func() *http.Request {
+				req := httptest.NewRequest("GET", "/", nil)
+				req.Header.Set("My-Header-1", "Header-Value-1")
+				req.Header.Set("My-Header-2", "Header-Value-2")
+				req.AddCookie(&http.Cookie{Name: "session-1", Value: "abc-1"})
+				req.AddCookie(&http.Cookie{Name: "session-2", Value: "abc-2"})
+				return req
+			},
+			parameters: map[string]map[string]string{
+				"header": {"My-Header-1": "true", "My-Header-2": "true"},
+				"cookie": {"session-1": "true", "session-2": "true"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "missing required header",
+			prepareRequest: func() *http.Request {
+				req := httptest.NewRequest("GET", "/", nil)
+				req.Header.Set("My-Header-1", "Header-Value-1")
+				req.AddCookie(&http.Cookie{Name: "session-1", Value: "abc-1"})
+				req.AddCookie(&http.Cookie{Name: "session-2", Value: "abc-2"})
+				return req
+			},
+			parameters: map[string]map[string]string{
+				"header": {"My-Header-1": "true", "My-Header-2": "true"},
+				"cookie": {"session-1": "true", "session-2": "true"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "missing required cookie",
+			prepareRequest: func() *http.Request {
+				req := httptest.NewRequest("GET", "/", nil)
+				req.Header.Set("My-Header-1", "Header-Value-1")
+				req.Header.Set("My-Header-2", "Header-Value-2")
+				req.AddCookie(&http.Cookie{Name: "session-1", Value: "abc-1"})
+				return req
+			},
+			parameters: map[string]map[string]string{
+				"header": {"My-Header-1": "true", "My-Header-2": "true"},
+				"cookie": {"session-1": "true", "session-2": "true"},
+			},
+			wantErr: true,
+		},
+		{
+			name: "optional header and cookie not provided partially",
+			prepareRequest: func() *http.Request {
+				req := httptest.NewRequest("GET", "/", nil)
+				req.Header.Set("My-Header-1", "Header-Value-1")
+				req.AddCookie(&http.Cookie{Name: "session-1", Value: "abc-1"})
+				return req
+			},
+			parameters: map[string]map[string]string{
+				"header": {"My-Header-1": "true", "My-Header-2": "false"},
+				"cookie": {"session-1": "true", "session-2": "false"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "optional header and cookie not provided",
+			prepareRequest: func() *http.Request {
+				req := httptest.NewRequest("GET", "/", nil)
+				return req
+			},
+			parameters: map[string]map[string]string{
+				"header": {"My-Header-1": "false", "My-Header-2": "false"},
+				"cookie": {"session-1": "false", "session-2": "false"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "no headers or cookies required",
+			prepareRequest: func() *http.Request {
+				req := httptest.NewRequest("GET", "/", nil)
+				return req
+			},
+			parameters: map[string]map[string]string{},
+			wantErr:    false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateHeadersAndCookies(tt.prepareRequest(), tt.parameters)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
 	}
