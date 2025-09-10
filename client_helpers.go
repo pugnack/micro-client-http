@@ -51,7 +51,7 @@ func buildHTTPRequest(
 			method = v
 		}
 		if v, ok := pathFromOpts(opts); ok {
-			path = v
+			path += v
 		}
 		if v, ok := bodyFromOpts(opts); ok {
 			bodyOpt = v

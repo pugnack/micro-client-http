@@ -49,7 +49,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
@@ -91,7 +91,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
@@ -133,7 +133,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
@@ -192,7 +192,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 
 			err := httpClient.Call(
 				ctx,
-				httpClient.NewRequest("test.service", "Test.Call", req),
+				httpClient.NewRequest("test.service", "/test/call", req),
 				rsp,
 				client.WithAddress(server.URL),
 				client.WithResponseMetadata(&respMetadata),
@@ -242,7 +242,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
@@ -288,7 +288,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
@@ -334,7 +334,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "session_id=abc123; theme=dark", r.Header.Get("Cookie"))
@@ -379,7 +379,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "session_id=abc123; theme=dark", r.Header.Get("Cookie"))
@@ -424,7 +424,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 					// Validate request
 					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/user/products", r.URL.RequestURI())
+					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
 
 					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
 					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
@@ -503,7 +503,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 			err := httpClient.Call(
 				ctx,
-				httpClient.NewRequest("test.service", "Test.Call", req),
+				httpClient.NewRequest("test.service", "/test/call", req),
 				rsp,
 				opts...,
 			)
@@ -548,7 +548,7 @@ func TestClient_Call_RequestTimeoutError(t *testing.T) {
 
 	err := httpClient.Call(
 		ctx,
-		httpClient.NewRequest("test.service", "Test.Call", req),
+		httpClient.NewRequest("test.service", "/test/call", req),
 		rsp,
 		client.WithAddress(server.URL),
 		client.WithRequestTimeout(time.Millisecond),
@@ -587,7 +587,7 @@ func TestClient_Call_ContextDeadlineError(t *testing.T) {
 
 	err := httpClient.Call(
 		ctx,
-		httpClient.NewRequest("test.service", "Test.Call", req),
+		httpClient.NewRequest("test.service", "/test/call", req),
 		rsp,
 		client.WithAddress(server.URL),
 		httpcli.Method(http.MethodPost),
