@@ -89,12 +89,12 @@ func buildHTTPRequest(
 
 	u, err := normalizeURL(fmt.Sprintf("%s%s", addr, resolvedPath))
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
+		return nil, errors.BadRequest("go.micro.client", "normalize url: %+v", err)
 	}
 
 	reqBody, err := cf.Marshal(newMsg)
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
+		return nil, errors.BadRequest("go.micro.client", "marshal msg: %+v", err)
 	}
 
 	var hreq *http.Request
@@ -107,12 +107,12 @@ func buildHTTPRequest(
 	}
 
 	if err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
+		return nil, errors.BadRequest("go.micro.client", "new http request: %+v", err)
 	}
 
 	setHeadersAndCookies(ctx, hreq, ct, opts)
 	if err = validateHeadersAndCookies(hreq, parameters); err != nil {
-		return nil, errors.BadRequest("go.micro.client", "%+v", err)
+		return nil, errors.BadRequest("go.micro.client", "validate headers and cookies: %+v", err)
 	}
 
 	if log.V(logger.DebugLevel) {
