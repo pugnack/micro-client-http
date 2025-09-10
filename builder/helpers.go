@@ -64,7 +64,7 @@ func isZeroValue(val protoreflect.Value, fd protoreflect.FieldDescriptor) bool {
 	case protoreflect.BytesKind:
 		return len(val.Bytes()) == 0
 	case protoreflect.BoolKind:
-		return val.Bool() == false
+		return !val.Bool()
 	case protoreflect.Int32Kind, protoreflect.Sint32Kind, protoreflect.Sfixed32Kind,
 		protoreflect.Int64Kind, protoreflect.Sint64Kind, protoreflect.Sfixed64Kind:
 		return val.Int() == 0
