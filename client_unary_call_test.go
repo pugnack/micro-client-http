@@ -176,6 +176,154 @@ func TestClient_Call_Get(t *testing.T) {
 	}
 }
 
+func TestClient_Call_Head(t *testing.T) {
+	type (
+		request  = pb.Test_Client_Call_Request
+		response = pb.Test_Client_Call_Response
+	)
+
+	tests := []struct {
+		name        string
+		method      string
+		path        string
+		req         *request
+		options     []client.CallOption
+		wantPath    string
+		wantReqBody []byte
+		wantRsp     *response
+		wantErr     bool
+	}{
+		{
+			name:        "HEAD request (query)",
+			method:      http.MethodHead,
+			path:        "/user/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			wantPath:    "/test/call/user/products?order_id=456&user_id=123",
+			wantReqBody: []byte{},
+			wantRsp:     &response{},
+			wantErr:     false,
+		},
+		{
+			name:        "HEAD request (path)",
+			method:      http.MethodHead,
+			path:        "/user/{user_id}/order/{order_id}/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			wantPath:    "/test/call/user/123/order/456/products",
+			wantReqBody: []byte{},
+			wantRsp:     &response{},
+			wantErr:     false,
+		},
+		{
+			name:        "HEAD request (path + query)",
+			method:      http.MethodHead,
+			path:        "/user/{user_id}/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			wantPath:    "/test/call/user/123/products?order_id=456",
+			wantReqBody: []byte{},
+			wantRsp:     &response{},
+			wantErr:     false,
+		},
+		{
+			name:        "HEAD request (zero-value query)",
+			method:      http.MethodHead,
+			path:        "/user/products",
+			req:         &request{},
+			wantPath:    "/test/call/user/products",
+			wantReqBody: []byte{},
+			wantRsp:     &response{},
+			wantErr:     false,
+		},
+		{
+			name:    "HEAD request (zero-value path)",
+			method:  http.MethodHead,
+			path:    "/user/{user_id}/products",
+			req:     &request{OrderId: 456},
+			wantRsp: nil,
+			wantErr: true,
+		},
+		{
+			name:    "HEAD request (with body)",
+			method:  http.MethodHead,
+			path:    "/user/products",
+			req:     &request{UserId: "123", OrderId: 456},
+			options: []client.CallOption{httpcli.Body("*")},
+			wantRsp: nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.Equal(t, tt.method, r.Method)
+				require.Equal(t, tt.wantPath, r.URL.RequestURI())
+
+				require.Equal(t, "application/json", r.Header.Get("Content-Type"))
+				require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
+				require.Equal(t, "My-Header-Value", r.Header.Get("My-Header"))
+
+				buf, err := io.ReadAll(r.Body)
+				require.NoError(t, err)
+				defer r.Body.Close()
+				require.Equal(t, tt.wantReqBody, buf)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("My-Header", "My-Header-Value")
+				w.WriteHeader(http.StatusOK)
+
+				// used to verify that the HTTP client skips the response body for HEAD method
+				c := jsoncodec.NewCodec()
+				buf, err = c.Marshal(map[string]any{"id": "product-id", "name": "product-name"})
+				require.NoError(t, err)
+				_, err = w.Write(buf)
+				require.NoError(t, err)
+			}))
+			defer server.Close()
+
+			httpClient := httpcli.NewClient(
+				client.Codec("application/json", jsoncodec.NewCodec()),
+			)
+
+			var (
+				ctx = metadata.NewOutgoingContext(
+					context.Background(),
+					metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value"),
+				)
+				rsp          = &response{}
+				respMetadata = metadata.Metadata{}
+			)
+
+			opts := []client.CallOption{
+				client.WithAddress(server.URL),
+				client.WithResponseMetadata(&respMetadata),
+				httpcli.Method(tt.method),
+				httpcli.Path(tt.path),
+			}
+
+			if len(tt.options) > 0 {
+				opts = append(opts, tt.options...)
+			}
+
+			err := httpClient.Call(
+				ctx,
+				httpClient.NewRequest("test.service", "/test/call", tt.req),
+				rsp,
+				opts...,
+			)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				require.Empty(t, rsp)
+			} else {
+				require.NoError(t, err)
+				require.True(t, proto.Equal(tt.wantRsp, rsp))
+				require.Equal(t, "application/json", respMetadata.GetJoined("Content-Type"))
+				require.Equal(t, "My-Header-Value", respMetadata.GetJoined("My-Header"))
+			}
+		})
+	}
+}
+
 func TestClient_Call_Post(t *testing.T) {
 	type (
 		request  = pb.Test_Client_Call_Request
