@@ -85,6 +85,14 @@ func TestClient_Call_Get(t *testing.T) {
 			wantErr:     false,
 		},
 		{
+			name:    "GET request (zero-value path)",
+			method:  http.MethodGet,
+			path:    "/user/{user_id}/products",
+			req:     &request{OrderId: 456},
+			wantRsp: nil,
+			wantErr: true,
+		},
+		{
 			name:    "GET request (with body)",
 			method:  http.MethodGet,
 			path:    "/user/products",
