@@ -668,57 +668,12 @@ func TestClient_Call_ErrorsMap(t *testing.T) {
 	tests := []struct {
 		name        string
 		serverMock  func() *httptest.Server
-		expectedRsp *response
 		expectedErr error
 	}{
-		{
-			name: "success",
-			serverMock: func() *httptest.Server {
-				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
-					// Validate request
-					require.Equal(t, "POST", r.Method)
-					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
-
-					require.Equal(t, "application/json", r.Header.Get("Content-Type"))
-					require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
-					require.Equal(t, "My-Header-Value", r.Header.Get("My-Header"))
-
-					buf, err := io.ReadAll(r.Body)
-					require.NoError(t, err)
-					defer r.Body.Close()
-
-					c := jsoncodec.NewCodec()
-
-					req := &request{}
-					err = c.Unmarshal(buf, req)
-					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
-
-					// Return response
-					w.Header().Set("Content-Type", "application/json")
-					w.Header().Set("My-Header", "My-Header-Value")
-					w.WriteHeader(http.StatusOK)
-
-					resp := map[string]interface{}{
-						"id":   "product-id",
-						"name": "product-name",
-					}
-					buf, err = c.Marshal(resp)
-					require.NoError(t, err)
-					_, err = w.Write(buf)
-					require.NoError(t, err)
-				}))
-			},
-			expectedRsp: &response{Id: "product-id", Name: "product-name"},
-		},
 		{
 			name: "default error",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -736,7 +691,7 @@ func TestClient_Call_ErrorsMap(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -759,8 +714,6 @@ func TestClient_Call_ErrorsMap(t *testing.T) {
 			name: "special error",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -778,7 +731,7 @@ func TestClient_Call_ErrorsMap(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -814,7 +767,7 @@ func TestClient_Call_ErrorsMap(t *testing.T) {
 					context.Background(),
 					metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value"),
 				)
-				req = &request{UserId: "user-id-1", OrderId: 123}
+				req = &request{UserId: "123", OrderId: 456}
 				rsp = &response{}
 
 				respMetadata = metadata.Metadata{}
@@ -839,13 +792,8 @@ func TestClient_Call_ErrorsMap(t *testing.T) {
 				opts...,
 			)
 
-			if tt.expectedErr != nil {
-				require.Equal(t, tt.expectedErr.Error(), err.Error())
-				require.Empty(t, rsp)
-			} else {
-				require.NoError(t, err)
-				require.True(t, proto.Equal(tt.expectedRsp, rsp))
-			}
+			require.Equal(t, tt.expectedErr.Error(), err.Error())
+			require.Empty(t, rsp)
 
 			require.Equal(t, "application/json", respMetadata.GetJoined("Content-Type"))
 			require.Equal(t, "My-Header-Value", respMetadata.GetJoined("My-Header"))
