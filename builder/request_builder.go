@@ -143,7 +143,8 @@ func validateHTTPMethod(method string) error {
 }
 
 func validateHTTPMethodAndBody(method string, bodyOpt bodyOption) error {
-	if method == http.MethodGet || method == http.MethodDelete {
+	switch method {
+	case http.MethodGet, http.MethodDelete, http.MethodHead, http.MethodOptions:
 		if !bodyOpt.isWithoutBody() {
 			return fmt.Errorf("%s method must not have a body", method)
 		}
