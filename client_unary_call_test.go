@@ -277,6 +277,14 @@ func TestClient_Call_Post(t *testing.T) {
 			wantRsp:     &response{Id: "product-id", Name: "product-name"},
 			wantErr:     false,
 		},
+		{
+			name:    "POST request (zero-value path)",
+			method:  http.MethodPost,
+			path:    "/user/{user_id}/products",
+			req:     &request{OrderId: 456},
+			wantRsp: nil,
+			wantErr: true,
+		},
 	}
 
 	for _, tt := range tests {
