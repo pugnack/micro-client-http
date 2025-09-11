@@ -702,8 +702,8 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
-						"id":   "product-id-1",
-						"name": "product-name-1",
+						"id":   "product-id",
+						"name": "product-name",
 					}
 					buf, err = c.Marshal(resp)
 					require.NoError(t, err)
@@ -711,7 +711,7 @@ func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 					require.NoError(t, err)
 				}))
 			},
-			expectedRsp: &response{Id: "product-id-1", Name: "product-name-1"},
+			expectedRsp: &response{Id: "product-id", Name: "product-name"},
 		},
 		{
 			name: "default error",
@@ -899,8 +899,8 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
-						"id":   "product-id-1",
-						"name": "product-name-1",
+						"id":   "product-id",
+						"name": "product-name",
 					}
 					buf, err = c.Marshal(resp)
 					require.NoError(t, err)
@@ -912,7 +912,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 				return metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value")
 			},
 			headersOption: []string{"Authorization", "true", "My-Header", "true"},
-			expectedRsp:   &response{Id: "product-id-1", Name: "product-name-1"},
+			expectedRsp:   &response{Id: "product-id", Name: "product-name"},
 		},
 		{
 			name: "without required headers",
@@ -945,8 +945,8 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
-						"id":   "product-id-1",
-						"name": "product-name-1",
+						"id":   "product-id",
+						"name": "product-name",
 					}
 					buf, err = c.Marshal(resp)
 					require.NoError(t, err)
@@ -990,8 +990,8 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
-						"id":   "product-id-1",
-						"name": "product-name-1",
+						"id":   "product-id",
+						"name": "product-name",
 					}
 					buf, err = c.Marshal(resp)
 					require.NoError(t, err)
@@ -1003,7 +1003,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 				return metadata.Pairs("Cookie", "session_id=abc123; theme=dark")
 			},
 			cookiesOption: []string{"session_id", "true", "theme", "true"},
-			expectedRsp:   &response{Id: "product-id-1", Name: "product-name-1"},
+			expectedRsp:   &response{Id: "product-id", Name: "product-name"},
 		},
 		{
 			name: "without required cookies",
@@ -1035,8 +1035,8 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
-						"id":   "product-id-1",
-						"name": "product-name-1",
+						"id":   "product-id",
+						"name": "product-name",
 					}
 					buf, err = c.Marshal(resp)
 					require.NoError(t, err)
@@ -1082,8 +1082,8 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					w.WriteHeader(http.StatusOK)
 
 					resp := map[string]interface{}{
-						"id":   "product-id-1",
-						"name": "product-name-1",
+						"id":   "product-id",
+						"name": "product-name",
 					}
 					buf, err = c.Marshal(resp)
 					require.NoError(t, err)
@@ -1100,7 +1100,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			},
 			headersOption: []string{"Authorization", "true", "My-Header", "true"},
 			cookiesOption: []string{"session_id", "true", "theme", "true"},
-			expectedRsp:   &response{Id: "product-id-1", Name: "product-name-1"},
+			expectedRsp:   &response{Id: "product-id", Name: "product-name"},
 		},
 	}
 
