@@ -75,15 +75,6 @@ func TestClient_Call_Get(t *testing.T) {
 			wantErr:     false,
 		},
 		{
-			name:    "GET request (with body)",
-			method:  http.MethodGet,
-			path:    "/user/products",
-			req:     &request{UserId: "123", OrderId: 456},
-			options: []client.CallOption{httpcli.Body("*")},
-			wantRsp: nil,
-			wantErr: true,
-		},
-		{
 			name:        "GET request (zero-value query)",
 			method:      http.MethodGet,
 			path:        "/user/products",
@@ -92,6 +83,15 @@ func TestClient_Call_Get(t *testing.T) {
 			wantReqBody: []byte{},
 			wantRsp:     &response{Id: "product-id", Name: "product-name"},
 			wantErr:     false,
+		},
+		{
+			name:    "GET request (with body)",
+			method:  http.MethodGet,
+			path:    "/user/products",
+			req:     &request{UserId: "123", OrderId: 456},
+			options: []client.CallOption{httpcli.Body("*")},
+			wantRsp: nil,
+			wantErr: true,
 		},
 	}
 
