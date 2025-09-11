@@ -811,8 +811,8 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 		name            string
 		serverMock      func() *httptest.Server
 		prepareMetadata func() metadata.Metadata
-		headersOption   []string
-		cookiesOption   []string
+		headerOption    client.CallOption
+		cookieOption    client.CallOption
 		expectedRsp     *response
 		wantErr         bool
 	}{
@@ -820,8 +820,6 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			name: "with required headers",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -839,7 +837,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -859,15 +857,13 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			prepareMetadata: func() metadata.Metadata {
 				return metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value")
 			},
-			headersOption: []string{"Authorization", "true", "My-Header", "true"},
-			expectedRsp:   &response{Id: "product-id", Name: "product-name"},
+			headerOption: httpcli.Header("Authorization", "true", "My-Header", "true"),
+			expectedRsp:  &response{Id: "product-id", Name: "product-name"},
 		},
 		{
 			name: "without required headers",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -885,7 +881,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -905,15 +901,13 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			prepareMetadata: func() metadata.Metadata {
 				return metadata.Pairs("Authorization", "Bearer token")
 			},
-			headersOption: []string{"Authorization", "true", "My-Header", "true"},
-			wantErr:       true,
+			headerOption: httpcli.Header("Authorization", "true", "My-Header", "true"),
+			wantErr:      true,
 		},
 		{
 			name: "with required cookies",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -930,7 +924,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -950,15 +944,13 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			prepareMetadata: func() metadata.Metadata {
 				return metadata.Pairs("Cookie", "session_id=abc123; theme=dark")
 			},
-			cookiesOption: []string{"session_id", "true", "theme", "true"},
-			expectedRsp:   &response{Id: "product-id", Name: "product-name"},
+			cookieOption: httpcli.Cookie("session_id", "true", "theme", "true"),
+			expectedRsp:  &response{Id: "product-id", Name: "product-name"},
 		},
 		{
 			name: "without required cookies",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -975,7 +967,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -995,15 +987,13 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 			prepareMetadata: func() metadata.Metadata {
 				return metadata.Pairs("Cookie", "session_id=abc123")
 			},
-			cookiesOption: []string{"session_id", "true", "theme", "true"},
-			wantErr:       true,
+			cookieOption: httpcli.Cookie("session_id", "true", "theme", "true"),
+			wantErr:      true,
 		},
 		{
 			name: "with headers and cookies",
 			serverMock: func() *httptest.Server {
 				return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					printHTTPRequest(t, r)
-
 					// Validate request
 					require.Equal(t, "POST", r.Method)
 					require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -1022,7 +1012,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					req := &request{}
 					err = c.Unmarshal(buf, req)
 					require.NoError(t, err)
-					require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+					require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 					// Return response
 					w.Header().Set("Content-Type", "application/json")
@@ -1046,9 +1036,9 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 					"Cookie", "session_id=abc123; theme=dark",
 				)
 			},
-			headersOption: []string{"Authorization", "true", "My-Header", "true"},
-			cookiesOption: []string{"session_id", "true", "theme", "true"},
-			expectedRsp:   &response{Id: "product-id", Name: "product-name"},
+			headerOption: httpcli.Header("Authorization", "true", "My-Header", "true"),
+			cookieOption: httpcli.Cookie("session_id", "true", "theme", "true"),
+			expectedRsp:  &response{Id: "product-id", Name: "product-name"},
 		},
 	}
 
@@ -1063,7 +1053,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 
 			var (
 				ctx = metadata.NewOutgoingContext(context.Background(), tt.prepareMetadata())
-				req = &request{UserId: "user-id-1", OrderId: 123}
+				req = &request{UserId: "123", OrderId: 456}
 				rsp = &response{}
 
 				respMetadata = metadata.Metadata{}
@@ -1076,11 +1066,11 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 				httpcli.Path("/user/products"),
 				httpcli.Body("*"),
 			}
-			if len(tt.headersOption) != 0 {
-				opts = append(opts, httpcli.Header(tt.headersOption...))
+			if tt.headerOption != nil {
+				opts = append(opts, tt.headerOption)
 			}
-			if len(tt.cookiesOption) != 0 {
-				opts = append(opts, httpcli.Cookie(tt.cookiesOption...))
+			if tt.cookieOption != nil {
+				opts = append(opts, tt.cookieOption)
 			}
 
 			err := httpClient.Call(
