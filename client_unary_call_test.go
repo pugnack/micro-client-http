@@ -508,7 +508,7 @@ func TestClient_Call_Post(t *testing.T) {
 	}
 }
 
-func TestClient_Call_Put(t *testing.T) {
+func TestClient_Call_Delete(t *testing.T) {
 	type (
 		request  = pb.Test_Client_Call_Request
 		response = pb.Test_Client_Call_Response
@@ -526,8 +526,8 @@ func TestClient_Call_Put(t *testing.T) {
 		wantErr     bool
 	}{
 		{
-			name:        "PUT request (query)",
-			method:      http.MethodPut,
+			name:        "DELETE request (query)",
+			method:      http.MethodDelete,
 			path:        "/user/products",
 			req:         &request{UserId: "123", OrderId: 456},
 			wantPath:    "/test/call/user/products?order_id=456&user_id=123",
@@ -536,8 +536,8 @@ func TestClient_Call_Put(t *testing.T) {
 			wantErr:     false,
 		},
 		{
-			name:        "PUT request (path)",
-			method:      http.MethodPut,
+			name:        "DELETE request (path)",
+			method:      http.MethodDelete,
 			path:        "/user/{user_id}/order/{order_id}/products",
 			req:         &request{UserId: "123", OrderId: 456},
 			wantPath:    "/test/call/user/123/order/456/products",
@@ -546,19 +546,8 @@ func TestClient_Call_Put(t *testing.T) {
 			wantErr:     false,
 		},
 		{
-			name:        "PUT request (body)",
-			method:      http.MethodPut,
-			path:        "/user/products",
-			req:         &request{UserId: "123", OrderId: 456},
-			options:     []client.CallOption{httpcli.Body("*")},
-			wantPath:    "/test/call/user/products",
-			wantReqBody: []byte(`{"userId":"123","orderId":456}`),
-			wantRsp:     &response{Id: "product-id", Name: "product-name"},
-			wantErr:     false,
-		},
-		{
-			name:        "PUT request (path + query)",
-			method:      http.MethodPut,
+			name:        "DELETE request (path + query)",
+			method:      http.MethodDelete,
 			path:        "/user/{user_id}/products",
 			req:         &request{UserId: "123", OrderId: 456},
 			wantPath:    "/test/call/user/123/products?order_id=456",
@@ -567,30 +556,8 @@ func TestClient_Call_Put(t *testing.T) {
 			wantErr:     false,
 		},
 		{
-			name:        "PUT request (path + body)",
-			method:      http.MethodPut,
-			path:        "/user/{user_id}/products",
-			req:         &request{UserId: "123", OrderId: 456},
-			options:     []client.CallOption{httpcli.Body("*")},
-			wantPath:    "/test/call/user/123/products",
-			wantReqBody: []byte(`{"orderId":456}`),
-			wantRsp:     &response{Id: "product-id", Name: "product-name"},
-			wantErr:     false,
-		},
-		{
-			name:        "PUT request (query + body)",
-			method:      http.MethodPut,
-			path:        "/user/products",
-			req:         &request{UserId: "123", OrderId: 456},
-			options:     []client.CallOption{httpcli.Body("order_id")},
-			wantPath:    "/test/call/user/products?user_id=123",
-			wantReqBody: []byte(`{"orderId":456}`),
-			wantRsp:     &response{Id: "product-id", Name: "product-name"},
-			wantErr:     false,
-		},
-		{
-			name:        "PUT request (zero-value query)",
-			method:      http.MethodPut,
+			name:        "DELETE request (zero-value query)",
+			method:      http.MethodDelete,
 			path:        "/user/products",
 			req:         &request{},
 			wantPath:    "/test/call/user/products",
@@ -599,21 +566,19 @@ func TestClient_Call_Put(t *testing.T) {
 			wantErr:     false,
 		},
 		{
-			name:        "PUT request (zero-value body)",
-			method:      http.MethodPut,
-			path:        "/user/products",
-			req:         &request{},
-			options:     []client.CallOption{httpcli.Body("*")},
-			wantPath:    "/test/call/user/products",
-			wantReqBody: []byte{},
-			wantRsp:     &response{Id: "product-id", Name: "product-name"},
-			wantErr:     false,
-		},
-		{
-			name:    "PUT request (zero-value path)",
-			method:  http.MethodPut,
+			name:    "DELETE request (zero-value path)",
+			method:  http.MethodDelete,
 			path:    "/user/{user_id}/products",
 			req:     &request{OrderId: 456},
+			wantRsp: nil,
+			wantErr: true,
+		},
+		{
+			name:    "DELETE request (with body)",
+			method:  http.MethodDelete,
+			path:    "/user/products",
+			req:     &request{UserId: "123", OrderId: 456},
+			options: []client.CallOption{httpcli.Body("*")},
 			wantRsp: nil,
 			wantErr: true,
 		},
