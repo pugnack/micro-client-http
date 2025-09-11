@@ -657,7 +657,7 @@ func TestClient_Call_Delete(t *testing.T) {
 	}
 }
 
-func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
+func TestClient_Call_ErrorsMap(t *testing.T) {
 	type (
 		request      = pb.Test_Client_Call_Request
 		response     = pb.Test_Client_Call_Response
