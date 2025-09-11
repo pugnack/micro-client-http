@@ -508,6 +508,190 @@ func TestClient_Call_Post(t *testing.T) {
 	}
 }
 
+func TestClient_Call_Put(t *testing.T) {
+	type (
+		request  = pb.Test_Client_Call_Request
+		response = pb.Test_Client_Call_Response
+	)
+
+	tests := []struct {
+		name        string
+		method      string
+		path        string
+		req         *request
+		options     []client.CallOption
+		wantPath    string
+		wantReqBody []byte
+		wantRsp     *response
+		wantErr     bool
+	}{
+		{
+			name:        "PUT request (query)",
+			method:      http.MethodPut,
+			path:        "/user/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			wantPath:    "/test/call/user/products?order_id=456&user_id=123",
+			wantReqBody: []byte{},
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (path)",
+			method:      http.MethodPut,
+			path:        "/user/{user_id}/order/{order_id}/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			wantPath:    "/test/call/user/123/order/456/products",
+			wantReqBody: []byte{},
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (body)",
+			method:      http.MethodPut,
+			path:        "/user/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			options:     []client.CallOption{httpcli.Body("*")},
+			wantPath:    "/test/call/user/products",
+			wantReqBody: []byte(`{"userId":"123","orderId":456}`),
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (path + query)",
+			method:      http.MethodPut,
+			path:        "/user/{user_id}/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			wantPath:    "/test/call/user/123/products?order_id=456",
+			wantReqBody: []byte{},
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (path + body)",
+			method:      http.MethodPut,
+			path:        "/user/{user_id}/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			options:     []client.CallOption{httpcli.Body("*")},
+			wantPath:    "/test/call/user/123/products",
+			wantReqBody: []byte(`{"orderId":456}`),
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (query + body)",
+			method:      http.MethodPut,
+			path:        "/user/products",
+			req:         &request{UserId: "123", OrderId: 456},
+			options:     []client.CallOption{httpcli.Body("order_id")},
+			wantPath:    "/test/call/user/products?user_id=123",
+			wantReqBody: []byte(`{"orderId":456}`),
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (zero-value query)",
+			method:      http.MethodPut,
+			path:        "/user/products",
+			req:         &request{},
+			wantPath:    "/test/call/user/products",
+			wantReqBody: []byte{},
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:        "PUT request (zero-value body)",
+			method:      http.MethodPut,
+			path:        "/user/products",
+			req:         &request{},
+			options:     []client.CallOption{httpcli.Body("*")},
+			wantPath:    "/test/call/user/products",
+			wantReqBody: []byte{},
+			wantRsp:     &response{Id: "product-id", Name: "product-name"},
+			wantErr:     false,
+		},
+		{
+			name:    "PUT request (zero-value path)",
+			method:  http.MethodPut,
+			path:    "/user/{user_id}/products",
+			req:     &request{OrderId: 456},
+			wantRsp: nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				require.Equal(t, tt.method, r.Method)
+				require.Equal(t, tt.wantPath, r.URL.RequestURI())
+
+				require.Equal(t, "application/json", r.Header.Get("Content-Type"))
+				require.Equal(t, "Bearer token", r.Header.Get("Authorization"))
+				require.Equal(t, "My-Header-Value", r.Header.Get("My-Header"))
+
+				buf, err := io.ReadAll(r.Body)
+				require.NoError(t, err)
+				defer r.Body.Close()
+				require.Equal(t, tt.wantReqBody, buf)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.Header().Set("My-Header", "My-Header-Value")
+				w.WriteHeader(http.StatusOK)
+
+				if tt.wantRsp != nil {
+					c := jsoncodec.NewCodec()
+					buf, err = c.Marshal(tt.wantRsp)
+					require.NoError(t, err)
+					_, err = w.Write(buf)
+					require.NoError(t, err)
+				}
+			}))
+			defer server.Close()
+
+			httpClient := httpcli.NewClient(
+				client.Codec("application/json", jsoncodec.NewCodec()),
+			)
+
+			var (
+				ctx = metadata.NewOutgoingContext(
+					context.Background(),
+					metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value"),
+				)
+				rsp          = &response{}
+				respMetadata = metadata.Metadata{}
+			)
+
+			opts := []client.CallOption{
+				client.WithAddress(server.URL),
+				client.WithResponseMetadata(&respMetadata),
+				httpcli.Method(tt.method),
+				httpcli.Path(tt.path),
+			}
+
+			if len(tt.options) > 0 {
+				opts = append(opts, tt.options...)
+			}
+
+			err := httpClient.Call(
+				ctx,
+				httpClient.NewRequest("test.service", "/test/call", tt.req),
+				rsp,
+				opts...,
+			)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				require.Empty(t, rsp)
+			} else {
+				require.NoError(t, err)
+				require.True(t, proto.Equal(tt.wantRsp, rsp))
+				require.Equal(t, "application/json", respMetadata.GetJoined("Content-Type"))
+				require.Equal(t, "My-Header-Value", respMetadata.GetJoined("My-Header"))
+			}
+		})
+	}
+}
+
 func TestClient_Call_SuccessAndErrorsMap(t *testing.T) {
 	type (
 		request      = pb.Test_Client_Call_Request
