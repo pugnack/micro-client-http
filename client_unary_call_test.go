@@ -3,10 +3,8 @@ package http_test
 import (
 	"context"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"net/http/httputil"
 	"testing"
 	"time"
 
@@ -19,13 +17,6 @@ import (
 	httpcli "go.unistack.org/micro-client-http/v4"
 	pb "go.unistack.org/micro-client-http/v4/builder/proto"
 )
-
-func printHTTPRequest(t *testing.T, r *http.Request) {
-	t.Helper()
-	output, err := httputil.DumpRequest(r, true)
-	require.NoError(t, err)
-	log.Printf("\n%s\n", output)
-}
 
 func TestClient_Call_Get(t *testing.T) {
 	type (
@@ -1187,7 +1178,7 @@ func TestClient_Call_RequestTimeoutError(t *testing.T) {
 
 	var (
 		ctx = context.Background()
-		req = &request{UserId: "user-id-1", OrderId: 123}
+		req = &request{UserId: "123", OrderId: 456}
 		rsp = &response{}
 	)
 
@@ -1229,7 +1220,7 @@ func TestClient_Call_ContextDeadlineError(t *testing.T) {
 
 	var (
 		ctx, cancel = context.WithDeadline(context.Background(), time.Now().Add(time.Millisecond))
-		req         = &request{UserId: "user-id-1", OrderId: 123}
+		req         = &request{UserId: "123", OrderId: 456}
 		rsp         = &response{}
 	)
 	defer cancel()
