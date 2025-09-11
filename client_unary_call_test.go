@@ -1240,3 +1240,45 @@ func TestClient_Call_ContextDeadlineError(t *testing.T) {
 	)
 	require.Error(t, err)
 }
+
+func TestClient_Call_ContextCanceled(t *testing.T) {
+	type (
+		request  = pb.Test_Client_Call_Request
+		response = pb.Test_Client_Call_Response
+	)
+
+	serverMock := func() *httptest.Server {
+		return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			time.Sleep(2 * time.Millisecond)
+		}))
+	}
+
+	server := serverMock()
+	defer server.Close()
+
+	httpClient := httpcli.NewClient(
+		client.Codec("application/json", jsoncodec.NewCodec()),
+	)
+
+	var (
+		ctx, cancel = context.WithCancel(context.Background())
+		req         = &request{UserId: "123", OrderId: 456}
+		rsp         = &response{}
+	)
+	cancel()
+
+	opts := []client.CallOption{
+		client.WithAddress(server.URL),
+		httpcli.Method(http.MethodPost),
+		httpcli.Path("/user/products"),
+		httpcli.Body("*"),
+	}
+
+	err := httpClient.Call(
+		ctx,
+		httpClient.NewRequest("test.service", "/test/call", req),
+		rsp,
+		opts...,
+	)
+	require.Error(t, err)
+}
