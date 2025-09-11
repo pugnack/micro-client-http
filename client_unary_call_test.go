@@ -1093,7 +1093,7 @@ func TestClient_Call_HeadersAndCookies(t *testing.T) {
 	}
 }
 
-func TestClient_Call_SuccessNoContent(t *testing.T) {
+func TestClient_Call_NoContent(t *testing.T) {
 	type (
 		request  = pb.Test_Client_Call_Request
 		response = pb.Test_Client_Call_Response
@@ -1101,8 +1101,6 @@ func TestClient_Call_SuccessNoContent(t *testing.T) {
 
 	serverMock := func() *httptest.Server {
 		return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			printHTTPRequest(t, r)
-
 			// Validate request
 			require.Equal(t, "POST", r.Method)
 			require.Equal(t, "/test/call/user/products", r.URL.RequestURI())
@@ -1120,7 +1118,7 @@ func TestClient_Call_SuccessNoContent(t *testing.T) {
 			req := &request{}
 			err = c.Unmarshal(buf, req)
 			require.NoError(t, err)
-			require.True(t, proto.Equal(&request{UserId: "user-id-1", OrderId: 123}, req))
+			require.True(t, proto.Equal(&request{UserId: "123", OrderId: 456}, req))
 
 			// Return response
 			w.Header().Set("Content-Type", "application/json")
@@ -1141,7 +1139,7 @@ func TestClient_Call_SuccessNoContent(t *testing.T) {
 			context.Background(),
 			metadata.Pairs("Authorization", "Bearer token", "My-Header", "My-Header-Value"),
 		)
-		req = &request{UserId: "user-id-1", OrderId: 123}
+		req = &request{UserId: "123", OrderId: 456}
 		rsp = &response{}
 
 		respMetadata = metadata.Metadata{}
